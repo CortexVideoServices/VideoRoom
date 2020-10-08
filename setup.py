@@ -12,7 +12,6 @@ settings = {
     'packages': find_namespace_packages(),
     'install_requires': [
         'CSV-Backend',
-        'aiohttp==3.6.2',
     ]
 }
 
