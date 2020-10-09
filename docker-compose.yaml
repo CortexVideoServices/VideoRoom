@@ -1,0 +1,23 @@
+version: '3.2'
+
+networks:
+  cvs:
+    external: true
+
+volumes:
+  pgdata_videoroom: {}
+
+services:
+
+  backend:
+    image: videoroom/backend
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+      args:
+        - BACKEND_PORT=7000
+        - POSTGRES
+    container_name: videoroom-backend
+    networks:
+      - cvs
+    restart: always

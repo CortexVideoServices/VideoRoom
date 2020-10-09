@@ -2,9 +2,10 @@
 .eggs
 *.egg-info
 __pycache__
-.git
-.cache
 build
 dist
+.venv
+
 *.md
 .gitignore
+docker-compose.*
