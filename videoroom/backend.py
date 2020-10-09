@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from aiohttp import web
 from aiopg.sa import create_engine
 from sqlalchemy import select, insert, update, delete
-from cvs.tools import proxy_pass_middleware, JSONEncoder
+from cvs.tools import ProxyPassMiddleware, JSONEncoder
 from videoroom.utils import ErrorWithInfo
 from videoroom.models import User, RegToken
 
@@ -59,10 +59,11 @@ class WebApplication(web.Application):
     def __init__(self, db, **kwargs):
         middlewares = kwargs.pop('middlewares', [])
         proxy_pass = kwargs.pop('proxy_pass', None)
+        backend_prefix = kwargs.pop('backend_prefix')
         if proxy_pass:
-            middlewares.append(lambda request, handler: proxy_pass_middleware(request, handler, proxy_pass))
+            middlewares.append(lambda app, *args, **kwargs: ProxyPassMiddleware(app, proxy_pass, *args, **kwargs))
         super().__init__(middlewares=middlewares, **kwargs)
-        self.add_routes(routes)
+        self.add_routes(web.RouteDef(r.method, backend_prefix + r.path, r.handler, r.kwargs) for r in routes)
         self.db = db
 
     async def signup_start(self, email):
@@ -100,7 +101,7 @@ class WebApplication(web.Application):
     async def factory(cls, options: argparse.Namespace):
         logging.basicConfig(level=(logging.DEBUG if options.debug else logging.WARNING))
         kwargs = dict((key, value) for key, value in options.__dict__.items() if
-                      key in ('proxy_pass', 'postgres_url'))
+                      key in ('proxy_pass', 'postgres_url', 'backend_prefix'))
         db_engine = await create_engine(kwargs.pop('postgres_url'))
         return cls(db_engine, logger=logging.root, **kwargs)
 
@@ -110,6 +111,7 @@ if __name__ == '__main__':
 
     parser = configargparse.ArgumentParser("VideoRoom bakend")
     parser.add_argument('-c', '--config', is_config_file=True, help='config file path')
+    parser.add_argument('-b', '--backend-prefix', default='/backend', help='URI prefix', env_var='BACKEND_PREFIX')
     parser.add_argument('-u', '--postgres-url', required=True, help='URL of Postgres', env_var='POSTGRES')
     parser.add_argument('-p', '--port', default=7000, help='served on port', env_var='BACKEND_PORT')
     parser.add_argument('-d', '--debug', default=False, action='store_true', help='debug mode', env_var='DEBUG')

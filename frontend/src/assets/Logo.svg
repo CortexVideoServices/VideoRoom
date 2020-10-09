@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="66.97332mm"
+        height="62.307194mm"
+        viewBox="0 0 66.97332 62.307194"
+        version="1.1"
+        id="svg1158">
+    <defs id="defs1152"/>
+    <metadata id="metadata1155">
+    </metadata>
+    <g id="layer1" transform="translate(-64.787151,-41.328546)">
+        <path
+                style="fill:#d4d4d4;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                d="m 65.939908,69.159568 19.2511,33.343882 h 10 l -19.24135,-33.326992 15.40477,-26.71562 h -10 z"
+                id="path1096"/>
+        <path
+                style="fill:#6d6e70;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                d="m 96.191008,102.50345 -19.2511,-33.343882 9.89642,-0.17942 14.350532,24.855859 19.03341,-33.350379 h 10.31068 l -24.33994,42.017822 z"
+                id="path1102"/>
+        <path
+                style="fill:#ffd503;fill-opacity:1;stroke:none;stroke-width:0.26458332px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+                d="m 77.431918,68.307378 h 10 17.272462 l -8.628242,14.94455 5.000002,8.660257 13.62824,-23.604807 4.51589,-7.82175 H 91.947808 L 102.35443,42.460838 H 92.354428 Z"
+                id="path1112"/>
+    </g>
+</svg>
