@@ -3,5 +3,5 @@ class ErrorWithInfo(Exception):
     """
 
     def __init__(self, message, **kwargs):
-        super.__init__(message)
+        super().__init__(self, message)
         self.ext_info = {'_class': self.__class__.__name__, '_message': message, **kwargs}

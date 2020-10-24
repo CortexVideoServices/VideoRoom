@@ -1,37 +1,46 @@
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { Tabs, TabList, Tab, TabPanel } from 'react-tabs';
 import './styles/App.css';
-import SignUpStart from './forms/SignUpStart';
+import SignUp from './forms/SignUp';
 import Login from './forms/Login';
 
-function Welcome() {
-  const [tabIndex, setTabIndex] = React.useState(0);
+interface Props {
+  tabIndex: number;
+}
+
+function Welcome(props: Props) {
+  const [tabIndex, setTabIndex] = React.useState(-1);
   return (
-    <Tabs selectedIndex={tabIndex} onSelect={(index) => setTabIndex(index)}>
+    <Tabs selectedIndex={tabIndex >= 0 ? tabIndex : props.tabIndex} onSelect={(index) => setTabIndex(index)}>
       <TabList>
         <Tab>
-          I have an
+          I have
           <br />
-          account
+          an&nbsp;account
         </Tab>
         <Tab>
           I have not
           <br />
-          an account
+          an&nbsp;account
         </Tab>
         <Tab>
-          I have a
+          I have
           <br />
-          call link
+          a&nbsp;call&nbsp;link
         </Tab>
       </TabList>
       <TabPanel>
         <Login />
+        <Redirect to="/login" />
       </TabPanel>
       <TabPanel>
-        <SignUpStart />
+        <SignUp />
+        <Redirect to="/signup" />
       </TabPanel>
-      <TabPanel />
+      <TabPanel>
+        <Redirect to="/haslink" />
+      </TabPanel>
     </Tabs>
   );
 }

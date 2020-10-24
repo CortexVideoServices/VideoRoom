@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 
 interface Values {
@@ -51,7 +52,16 @@ function SignUpStart() {
       </>
     );
   else if (result === 1) return <p>We have sent an invitation to sign up, check your email.</p>;
-  else return <p>Something is wrong. Try to login a little later.</p>;
+  else
+    return (
+      <p>
+        Something is wrong.{' '}
+        <Link to="/" onClick={() => setResult(0)}>
+          Try to login a little later
+        </Link>
+        .
+      </p>
+    );
 }
 
 export default SignUpStart;

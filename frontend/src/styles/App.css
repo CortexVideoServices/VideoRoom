@@ -2,6 +2,11 @@
     text-align: center;
 }
 
+a {
+    color: #ffd503;
+}
+
+
 .App-logo {
     height: 40vmin;
     pointer-events: none;
@@ -74,7 +79,9 @@
 }
 
 
-.react-tabs {}
+.react-tabs {
+    padding-inline-start: 0;
+}
 
 .react-tabs__tab-list {
     display: flex;

@@ -1,9 +1,10 @@
 from logging.config import fileConfig
 
-from sqlalchemy import engine_from_config, create_engine
+from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
-from alembic import context
+from videoroom.alembic import context
+from cvs.server.alembic import create_database_if_not_exists
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -25,20 +26,6 @@ target_metadata = models.Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
-
-def create_database_if_not_exists():
-    from sqlalchemy.engine.url import make_url
-    url = make_url(config.get_main_option("sqlalchemy.url"))
-    database = url.database
-    url.database = 'postgres'
-    engine = create_engine(str(url))
-    engine.update_execution_options(isolation_level="AUTOCOMMIT")
-    try:
-        engine.execute(f'CREATE DATABASE {database} WITH OWNER postgres')
-    except Exception as exc:
-        pass
-    engine.dispose()
 
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
