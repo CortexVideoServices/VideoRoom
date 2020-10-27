@@ -10,12 +10,14 @@ class User(Base):
     """
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    created_at = Column(DateTime, server_default=func.now())
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
     display_name = Column(String)
     email = Column(String, unique=True, index=True, nullable=False)
     salt = Column(String, nullable=False)
     password = Column(String, nullable=False)
     expired_at = Column(DateTime)
+    refresh_token = Column(String, index=True)
+    token_expired_at = Column(DateTime, nullable=False, server_default=func.now())
 
 
 class RegToken(Base):
@@ -26,11 +28,3 @@ class RegToken(Base):
     email = Column(String, nullable=False)
     expired_at = Column(DateTime, nullable=False)
     confirmed_at = Column(DateTime)
-
-
-# class Session(Base):
-#     """ Video session
-#     """
-#     __tablename__ = 'session'
-#     id = Column(String, primary_key=True)
-#     created_by = Column(Integer, ForeignKey('user.id'), nullable=False)
