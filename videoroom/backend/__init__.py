@@ -136,6 +136,6 @@ class Application(web.Application):
         """ Reset refresh token """
         db = self['db_engine']
         async with db.acquire() as connection:
-            query = update(User).where(User.email==token_data['email']).values(refresf_token=None)
+            query = update(User).where(User.email==token_data['email']).values(refresh_token=None)
             if (await connection.execute(query)).rowcount > 0:
                 return True

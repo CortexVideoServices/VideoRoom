@@ -1,5 +1,7 @@
 import React from 'react';
-import { Formik, Form, Field, useFormik, ErrorMessage } from 'formik';
+import { Link, Redirect } from 'react-router-dom';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import auth from '../api/jwt4auth';
 
 interface Values {
   email: string;
@@ -8,53 +10,57 @@ interface Values {
 
 const validate = (values: Values) => {
   const errors: Partial<Values> = {};
-  if (!values.email) {
-    errors.email = 'Required';
-  } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(values.email)) {
-    errors.email = 'Invalid email address';
-  }
-  if (!values.password) {
-    errors.password = 'Required';
-  }
+  if (!values.email) errors.email = 'Required';
+  if (!values.password) errors.password = 'Required';
   return errors;
 };
 
 function Login() {
-  const initialValues: Values = { email: '', password: '' };
   const [result, setResult] = React.useState(0);
-  if (result === 0)
+  if (result < 2) {
+    if (result === 1)
+      window.location.reload();
     return (
-      <>
-        <Formik
-          initialValues={initialValues}
-          validate={validate}
-          onSubmit={(values, actions) => {
-            fetch('/backend/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(values),
-            })
-              .then((resp) => setResult(resp.ok ? 1 : 2))
-              .catch(() => setResult(2))
-              .finally(() => actions.setSubmitting(false));
-          }}
-        >
-          <Form>
-            <label htmlFor="email">Yor email address</label>
-            <Field id="email" name="email" placeholder="EMail" />
-            <ErrorMessage name="email" component="div" className="App-dialog-field-error" />
-            <label htmlFor="password">Password</label>
-            <Field id="password" name="password" placeholder="Password" type="password" />
-            <ErrorMessage name="password" component="div" className="App-dialog-field-error" />
-            <button type="submit">Login</button>
-          </Form>
-        </Formik>
-      </>
+      <Formik
+        initialValues={{ email: '', password: '' }}
+        validate={validate}
+        onSubmit={(values, actions) => {
+          auth
+            .login(values.email, values.password)
+            .then((value) => setResult(value ? 1 : 2))
+            .catch(() => setResult(3))
+            .finally(() => actions.setSubmitting(false));
+        }}
+      >
+        <Form>
+          <label htmlFor="email">Yor email address</label>
+          <Field id="email" name="email" placeholder="EMail" />
+          <ErrorMessage name="email" component="div" className="App-dialog-field-error" />
+          <label htmlFor="password">Password</label>
+          <Field id="password" name="password" placeholder="Password" type="password" />
+          <ErrorMessage name="password" component="div" className="App-dialog-field-error" />
+          <button type="submit">Login</button>
+        </Form>
+      </Formik>
     );
-  else if (result === 1) return <p>SUCCESS!</p>;
-  else return <p>Something is wrong. Try to register a little later.</p>;
+  } else if (result === 2)
+    return (
+      <p>
+        Account with this email address and this password not found.{' '}
+        <Link to="/" onClick={() => setResult(0)}>
+          Please try again
+        </Link>
+      </p>
+    );
+  else
+    return (
+      <p>
+        Something is wrong.{' '}
+        <Link to="/" onClick={() => setResult(0)}>
+          Try to login a little later.
+        </Link>
+      </p>
+    );
 }
 
 export default Login;
