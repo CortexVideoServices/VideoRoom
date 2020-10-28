@@ -15,7 +15,7 @@ const validate = (values: Values) => {
   return errors;
 };
 
-function Login() {
+function UsersLogin() {
   const [result, setResult] = React.useState(0);
   if (result < 2) {
     if (result === 1)
@@ -63,4 +63,4 @@ function Login() {
     );
 }
 
-export default Login;
+export default UsersLogin;

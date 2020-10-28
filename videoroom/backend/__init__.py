@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import select, insert, update, delete
 from aiohttp import web
 import jwt4auth.aiohttp
+from ..utils import Mailer, MIMEText
 from ..models import User, RegToken
 
 SIGNUP_TOKEN_EXPIRED = 15 * 60
@@ -13,6 +14,13 @@ REFRESH_TOKEN_EXPIRED = 30 * 60
 class SignupError(Exception):
     """ Signup error"""
 
+SIGN_UP_LETTER = """
+<html><body>
+<p>Hi!<p> 
+<p>You can see this email because you started registering in the <b>VideoRoom</b> app. 
+If you would like to continue, please follow <a href="https://cvs.solutions/#/signup/{0}">this link</a>.
+</body></html>
+"""
 
 class AuthManager(jwt4auth.aiohttp.AuthManager):
     """ Auth manager
@@ -50,6 +58,7 @@ class Application(web.Application):
     """ Video room application
     """
     def __init__(self, settings: Dict, **kwargs):
+        self.mailer = Mailer(kwargs.pop('mailer'))
         super().__init__(**kwargs)
         self.settings = settings
         self.status = 'OK'
@@ -64,6 +73,8 @@ class Application(web.Application):
                 expired_at = datetime.utcnow() + timedelta(seconds=SIGNUP_TOKEN_EXPIRED)
                 query = insert(RegToken).values(token=token, email=email, expired_at=expired_at)
                 if (await connection.execute(query)).rowcount:
+                    message = MIMEText(SIGN_UP_LETTER.format(token), "html", "utf-8")
+                    await self.mailer.send(self.mailer.kwargs['username'], email, "Invitation to sign up", message)
                     # ToDo: send registration mail
                     return token
                 raise SignupError('Error #101')

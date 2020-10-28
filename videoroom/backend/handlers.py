@@ -38,5 +38,5 @@ async def signup(request: web.Request):
                 if await app.signup_finish(token, display_name, password):
                     return web.HTTPCreated()
     except SignupError as exc:
-        return web.json_response(exc.ext_info, status=400, reason=str(exc))
+        return web.HTTPBadRequest(reason=str(exc))
     return web.HTTPUnprocessableEntity()

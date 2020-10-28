@@ -2,8 +2,8 @@ import React from 'react';
 import { Switch, Route } from 'react-router-dom';
 import logo from './assets/Logo.svg';
 import './styles/App.css';
-import Welcome from './Welcome';
-import UserSession from './UserSession';
+import UsersSession from './components/UsersSession';
+import Welcome from './views/Welcome';
 
 function App() {
   return (
@@ -11,11 +11,11 @@ function App() {
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
       </header>
-      <UserSession>
+      <UsersSession>
         <Switch>
           <Route path="*" children={<Welcome tabIndex={0} />} />
         </Switch>
-      </UserSession>
+      </UsersSession>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import React, { useContext } from 'react';
-import { UserSessionContext } from './UserSession';
-import './styles/App.css';
-import Login from './forms/Login';
-import CreateConference from './forms/CreateConference';
-import jwt4auth from './api/jwt4auth';
+import { UserSessionContext } from '../components/UsersSession';
+import '../styles/App.css';
+import jwt4auth from '../api/jwt4auth';
+import UsersLogin from '../forms/UsersLogin';
+import ConferenceCreate from '../forms/ConferenceCreate';
+import UsersSignUp from '../forms/UsersSignUp';
 
 interface Props {
   tabIndex: number;
@@ -17,11 +18,18 @@ function Welcome(props: Props) {
     <div className="App-dialog">
       <div className="TabSet">
         {userdata === null ? (
-          <div className={`Tab ${selected(0)}`} onClick={() => setTabIndex(0)}>
-            I have
-            <br />
-            an account
-          </div>
+          <>
+            <div className={`Tab ${selected(0)}`} onClick={() => setTabIndex(0)}>
+              I have
+              <br />
+              an account
+            </div>
+            <div className={`Tab ${selected(1)}`} onClick={() => setTabIndex(1)}>
+              I haven't
+              <br />
+              an account
+            </div>
+          </>
         ) : (
           <div className={`Tab ${selected(0)}`} onClick={() => setTabIndex(0)}>
             Create video
@@ -29,13 +37,6 @@ function Welcome(props: Props) {
             conference
           </div>
         )}
-        {userdata === null ? (
-          <div className={`Tab ${selected(1)}`} onClick={() => setTabIndex(1)}>
-            I haven't
-            <br />
-            an account
-          </div>
-        ) : null}
         <div className={`Tab ${selected(2)}`} onClick={() => setTabIndex(2)}>
           I have link
           <br />
@@ -47,8 +48,10 @@ function Welcome(props: Props) {
           </div>
         ) : null}
       </div>
-      <div className={`TabPanel ${selected(0)}`}>{userdata === null ? <Login /> : <CreateConference />}</div>
-      <div className={`TabPanel ${selected(1)}`}>Signup</div>
+      <div className={`TabPanel ${selected(0)}`}>{userdata === null ? <UsersLogin /> : <ConferenceCreate />}</div>
+      <div className={`TabPanel ${selected(1)}`}>
+        <UsersSignUp />
+      </div>
       <div className={`TabPanel ${selected(2)}`}></div>
     </div>
   );

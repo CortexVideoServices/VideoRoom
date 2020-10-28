@@ -1,7 +1,7 @@
 import React from 'react';
 
-function CreateConference() {
+function ConferenceCreate() {
   return <p>ToDo: Create conference</p>;
 }
 
-export default CreateConference;
+export default ConferenceCreate;

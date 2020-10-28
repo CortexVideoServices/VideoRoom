@@ -18,6 +18,7 @@ settings = {
         'SQLAlchemy==1.3.15',
         'psycopg2-binary==2.8.4',
         'aiopg==1.0.0',
+        'aiosmtplib==1.1.1'
     ]
 }
 

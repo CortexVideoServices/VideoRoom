@@ -56,21 +56,22 @@ async function logoff() {
   }
 }
 
-async function get_token_data() {
+async function getTokenData() {
   if (typeof refresh_token === 'string' && token_data === null) {
-    await refresh_token_data();
+    await refreshTokenData();
   }
   return token_data;
 }
 
-async function refresh_token_data() {
+async function refreshTokenData() {
   return refresh();
 }
 
 export default {
+  fetch,
   login,
   logoff,
-  get_token_data,
-  refresh_token_data,
-  is_authenticated: () => typeof refresh_token === 'string',
+  getTokenData: getTokenData,
+  refreshTokenData: refreshTokenData,
+  isAuthenticated: () => typeof refresh_token === 'string',
 };
