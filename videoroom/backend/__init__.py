@@ -1,18 +1,24 @@
+import json
 import hashlib
+import aiohttp
 from typing import Dict, Optional
 from uuid import uuid4
 from datetime import datetime, timedelta
 from sqlalchemy import select, insert, update, delete
 from aiohttp import web
 import jwt4auth.aiohttp
+from cvs.web.utils import JSONEncoder
 from ..utils import Mailer, MIMEText
-from ..models import User, RegToken
+from ..models import User, RegToken, Conference
 
 SIGNUP_TOKEN_EXPIRED = 15 * 60
 REFRESH_TOKEN_EXPIRED = 30 * 60
+CONFERENCE_EXPIRED = 15 * 60
+
 
 class SignupError(Exception):
     """ Signup error"""
+
 
 SIGN_UP_LETTER = """
 <html><body>
@@ -21,6 +27,7 @@ SIGN_UP_LETTER = """
 If you would like to continue, please follow <a href="https://cvs.solutions/#/signup/{0}">this link</a>.
 </body></html>
 """
+
 
 class AuthManager(jwt4auth.aiohttp.AuthManager):
     """ Auth manager
@@ -57,6 +64,7 @@ class AuthManager(jwt4auth.aiohttp.AuthManager):
 class Application(web.Application):
     """ Video room application
     """
+
     def __init__(self, settings: Dict, **kwargs):
         self.mailer = Mailer(kwargs.pop('mailer'))
         super().__init__(**kwargs)
@@ -123,14 +131,14 @@ class Application(web.Application):
         async with db.acquire() as connection:
             query = select([User]).where(User.email == username)
             if user := await(await connection.execute(query)).first():
-                return {'email': user.email, 'display_name': user.display_name}
+                return {'user_id': user.id, 'email': user.email, 'display_name': user.display_name}
 
     async def save_refresh_token(self, token_data: Dict, refresh_token: str) -> bool:
         """ Saves refresh token """
         db = self['db_engine']
         async with db.acquire() as connection:
             token_expired_at = datetime.utcnow() + timedelta(seconds=REFRESH_TOKEN_EXPIRED)
-            query = update(User).where(User.email==token_data['email'])\
+            query = update(User).where(User.email == token_data['email']) \
                 .values(refresh_token=refresh_token, token_expired_at=token_expired_at)
             if (await connection.execute(query)).rowcount > 0:
                 return True
@@ -139,7 +147,8 @@ class Application(web.Application):
         """ Checks refresh token """
         db = self['db_engine']
         async with db.acquire() as connection:
-            query = select([User]).where(User.refresh_token == refresh_token).where(User.token_expired_at > datetime.utcnow())
+            query = select([User]).where(User.refresh_token == refresh_token).where(
+                User.token_expired_at > datetime.utcnow())
             if user := await(await connection.execute(query)).first():
                 return {'email': user.email, 'display_name': user.display_name}
 
@@ -147,6 +156,43 @@ class Application(web.Application):
         """ Reset refresh token """
         db = self['db_engine']
         async with db.acquire() as connection:
-            query = update(User).where(User.email==token_data['email']).values(refresh_token=None)
+            query = update(User).where(User.email == token_data['email']).values(refresh_token=None)
             if (await connection.execute(query)).rowcount > 0:
+                return True
+
+    async def get_conference(self, user_id):
+        """ Return current conference if exists """
+        db = self['db_engine']
+        async with db.acquire() as connection:
+            query = select([Conference]).where(Conference.user_id == user_id).where(
+                Conference.expired_at > datetime.utcnow())
+            if conference := await(await connection.execute(query)).first():
+                return conference
+
+    async def create_conference(self, user_id, display_name, description, allow_anonymous):
+        db = self['db_engine']
+        if await self.get_conference(user_id):
+            return
+        session_id = None
+        started_at = datetime.utcnow()
+        expired_at = started_at + timedelta(seconds=CONFERENCE_EXPIRED)
+
+        async with aiohttp.ClientSession(json_serialize=lambda obj: json.dumps(obj, cls=JSONEncoder)) as session:
+            try:
+                data = dict(app_id=self.settings['api_key'], started_at=started_at, expired_at=expired_at,
+                            display_name=display_name, allow_anonymous=allow_anonymous)
+                resp = await session.request('POST', self.settings['api_url'] + '/v1/session', json=data)
+                if resp.status == 201:
+                    session_id = (await resp.json())['id']
+                else:
+                    raise ValueError(f"Wrong response status: ${resp.status}")
+            except Exception as exc:
+                message = f"SDK server unavailable: ${exc}"
+                self.logger.exception(message)
+                return
+        async with db.acquire() as connection:
+            query = insert(Conference).values(session_id=session_id, user_id=user_id,
+                                              display_name=display_name, started_at=started_at, expired_at=expired_at,
+                                              description=description, allow_anonymous=allow_anonymous)
+            if (await connection.execute(query)).rowcount:
                 return True

@@ -1,5 +1,5 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, DateTime, String, Integer, Boolean
+from sqlalchemy import Column, DateTime, String, Integer, Boolean, Numeric
 from sqlalchemy import ForeignKey, func
 
 Base = declarative_base()
@@ -28,3 +28,19 @@ class RegToken(Base):
     email = Column(String, nullable=False)
     expired_at = Column(DateTime, nullable=False)
     confirmed_at = Column(DateTime)
+
+
+class Conference(Base):
+    """ Video conference
+    """
+    __tablename__ = 'conference'
+    session_id = Column(String, primary_key=True)
+    user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    started_at = Column(DateTime, nullable=False, server_default=func.now())
+    allow_anonymous = Column(Boolean, nullable=False)
+    display_name = Column(String)
+    description = Column(String)
+    expired_at = Column(DateTime)
+
+

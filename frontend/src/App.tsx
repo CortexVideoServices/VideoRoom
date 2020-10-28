@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 import logo from './assets/Logo.svg';
 import './styles/App.css';
 import UsersSession from './components/UsersSession';
-import Welcome from './views/Welcome';
+import Welcome from './components/Welcome';
 
 function App() {
   return (

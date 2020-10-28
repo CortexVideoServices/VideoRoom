@@ -70,7 +70,6 @@ function FinishForm({ email, token }: FinishFormProps) {
 export function UsersSignUpFinish() {
   const { token } = useParams();
   const [email, setEmail] = useState('');
-  (async function () {})();
   useEffect(() => {
     fetch(`/backend/signup/${token}`)
       .then((resp) => resp.json())

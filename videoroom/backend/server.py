@@ -34,7 +34,7 @@ class WebApplication(Application):
                 if resp.status != 200:
                     raise ValueError(f"Wrong response status: ${resp.status}")
             except Exception as exc:
-                message = f"SDK server available: ${exc}"
+                message = f"SDK server unavailable: ${exc}"
                 obj.logger.exception(message)
                 raise RuntimeError(message)
         return obj

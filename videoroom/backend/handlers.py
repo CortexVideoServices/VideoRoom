@@ -1,5 +1,8 @@
+import json
 from aiohttp import web
+from cvs.web.utils import JSONEncoder
 from . import Application, SignupError
+from jwt4auth.aiohttp.handlers import authenticated
 
 routes = web.RouteTableDef()
 
@@ -39,4 +42,31 @@ async def signup(request: web.Request):
                     return web.HTTPCreated()
     except SignupError as exc:
         return web.HTTPBadRequest(reason=str(exc))
+    return web.HTTPUnprocessableEntity()
+
+
+@authenticated
+@routes.get('/conference')
+@routes.post('/conference')
+async def conference(request: web.Request):
+    app = request.app  # type: Application
+    token_data = request['token_data']
+    user_id = token_data['user_id']
+    if request.method == 'POST':
+        if request.content_type.startswith('application/json'):
+            data = await request.json()
+        else:
+            data = await request.post()
+        try:
+            allow_anonymous = data['allow_anonymous']
+            display_name = data['display_name']
+            description = data['description']
+        except KeyError as exc:
+            raise web.HTTPBadRequest(reason=str(exc))
+        if await app.create_conference(user_id, display_name, description, allow_anonymous):
+            return web.HTTPOk()
+    else:
+        if result := await app.get_conference(user_id):
+            return web.json_response(result, dumps=lambda obj: json.dumps(obj, cls=JSONEncoder))
+        return web.HTTPNotFound()
     return web.HTTPUnprocessableEntity()

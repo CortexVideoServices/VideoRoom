@@ -1,10 +1,10 @@
 import React, { useContext } from 'react';
-import { UserSessionContext } from '../components/UsersSession';
+import { UserSessionContext } from './UsersSession';
 import '../styles/App.css';
 import jwt4auth from '../api/jwt4auth';
-import UsersLogin from '../forms/UsersLogin';
-import ConferenceCreate from '../forms/ConferenceCreate';
-import UsersSignUp from '../forms/UsersSignUp';
+import UsersLogin from './UsersLogin';
+import ConferenceDlg from './ConferenceDlg';
+import UsersSignUp from './UsersSignUp';
 
 interface Props {
   tabIndex: number;
@@ -32,7 +32,7 @@ function Welcome(props: Props) {
           </>
         ) : (
           <div className={`Tab ${selected(0)}`} onClick={() => setTabIndex(0)}>
-            Create video
+            Video
             <br />
             conference
           </div>
@@ -48,7 +48,7 @@ function Welcome(props: Props) {
           </div>
         ) : null}
       </div>
-      <div className={`TabPanel ${selected(0)}`}>{userdata === null ? <UsersLogin /> : <ConferenceCreate />}</div>
+      <div className={`TabPanel ${selected(0)}`}>{userdata === null ? <UsersLogin /> : <ConferenceDlg />}</div>
       <div className={`TabPanel ${selected(1)}`}>
         <UsersSignUp />
       </div>

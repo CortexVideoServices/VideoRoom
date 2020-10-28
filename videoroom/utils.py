@@ -38,5 +38,4 @@ class Mailer(object):
             message.attach(body)
         else:
             message.attach(MIMEText(body, 'plain', 'utf-8'))
-        print('self.kwargs', self.kwargs)
         await aiosmtplib.send(message, **self.kwargs)
