@@ -169,6 +169,15 @@ class Application(web.Application):
             if conference := await(await connection.execute(query)).first():
                 return conference
 
+    async def get_conference_by_id(self, session_id):
+        """ Return conference data by session id """
+        db = self['db_engine']
+        async with db.acquire() as connection:
+            query = select([Conference]).where(Conference.session_id == session_id).where(
+                Conference.expired_at > datetime.utcnow())
+            if conference := await(await connection.execute(query)).first():
+                return conference
+
     async def create_conference(self, user_id, display_name, description, allow_anonymous):
         db = self['db_engine']
         if await self.get_conference(user_id):

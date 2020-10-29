@@ -1,10 +1,12 @@
 import React, { useContext } from 'react';
+import { Redirect } from 'react-router-dom';
 import { UserSessionContext } from './UsersSession';
 import '../styles/App.css';
 import jwt4auth from '../api/jwt4auth';
 import UsersLogin from './UsersLogin';
 import ConferenceDlg from './ConferenceDlg';
 import UsersSignUp from './UsersSignUp';
+
 
 interface Props {
   tabIndex: number;
@@ -37,22 +39,26 @@ function Welcome(props: Props) {
             conference
           </div>
         )}
-        <div className={`Tab ${selected(2)}`} onClick={() => setTabIndex(2)}>
-          I have link
-          <br />
-          to invitation
-        </div>
         {userdata !== null ? (
           <div className="Tab" onClick={() => jwt4auth.logoff().finally(() => window.location.reload())}>
             Logoff
           </div>
         ) : null}
       </div>
-      <div className={`TabPanel ${selected(0)}`}>{userdata === null ? <UsersLogin /> : <ConferenceDlg />}</div>
+      <div className={`TabPanel ${selected(0)}`}>
+        {userdata === null ? (
+          <div>
+            <Redirect to="/login" />
+            <UsersLogin />
+          </div>
+        ) : (
+          <ConferenceDlg />
+        )}
+      </div>
       <div className={`TabPanel ${selected(1)}`}>
+        {tabIndex === 1 && <Redirect to="/signup" />}
         <UsersSignUp />
       </div>
-      <div className={`TabPanel ${selected(2)}`}></div>
     </div>
   );
 }

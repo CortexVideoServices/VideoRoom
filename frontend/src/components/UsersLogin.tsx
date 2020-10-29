@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Redirect } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import auth from '../api/jwt4auth';
 
@@ -18,8 +18,7 @@ const validate = (values: Values) => {
 function UsersLogin() {
   const [result, setResult] = React.useState(0);
   if (result < 2) {
-    if (result === 1)
-      window.location.reload();
+    if (result === 1) window.location.reload();
     return (
       <Formik
         initialValues={{ email: '', password: '' }}
@@ -47,7 +46,13 @@ function UsersLogin() {
     return (
       <p>
         Account with this email address and this password not found.{' '}
-        <Link to="/" onClick={() => setResult(0)}>
+        <Link
+          to="/"
+          onClick={(e) => {
+            setResult(0);
+
+          }}
+        >
           Please try again
         </Link>
       </p>
@@ -56,7 +61,12 @@ function UsersLogin() {
     return (
       <p>
         Something is wrong.{' '}
-        <Link to="/" onClick={() => setResult(0)}>
+        <Link
+          to="/"
+          onClick={() => {
+            setResult(0);
+          }}
+        >
           Try to login a little later.
         </Link>
       </p>

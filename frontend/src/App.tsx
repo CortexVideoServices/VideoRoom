@@ -4,6 +4,7 @@ import logo from './assets/Logo.svg';
 import './styles/App.css';
 import UsersSession from './components/UsersSession';
 import Welcome from './components/Welcome';
+import Conference from './components/Conference';
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       </header>
       <UsersSession>
         <Switch>
+          <Route path="/conference/:session_id" children={<Conference />} />
           <Route path="*" children={<Welcome tabIndex={0} />} />
         </Switch>
       </UsersSession>

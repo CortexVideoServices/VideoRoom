@@ -70,3 +70,12 @@ async def conference(request: web.Request):
             return web.json_response(result, dumps=lambda obj: json.dumps(obj, cls=JSONEncoder))
         return web.HTTPNotFound()
     return web.HTTPUnprocessableEntity()
+
+
+@routes.get('/conference/{session_id}')
+async def conference(request: web.Request):
+    app = request.app  # type: Application
+    session_id = request.match_info.get('session_id')
+    if result := await app.get_conference_by_id(session_id):
+        return web.json_response(result, dumps=lambda obj: json.dumps(obj, cls=JSONEncoder))
+    return web.HTTPNotFound()

@@ -28,6 +28,7 @@ a {
     justify-content: center;
     font-size: calc(10px + 2vmin);
     color: white;
+    padding: 20px 0;
 }
 
 @keyframes App-logo-spin {
@@ -131,21 +132,34 @@ a {
 }
 
 
-.react-tabs {
-    padding-inline-start: 0;
-}
-
-.react-tabs__tab-list {
+.Table {
     display: flex;
+    flex-direction: column;
 }
 
-.react-tabs__tab {
-    display: block;
-    padding: 10px;
-    cursor: pointer;
-    color: #ffd503 !important;
+.TableRow {
+    display: flex;
+    flex-direction: row;
+    margin: 6px 0;
+    border-bottom: 1px solid #d4d4d4;
 }
-.react-tabs__tab--selected {}
 
-.react-tabs__tab-panel {}
-.react-tabs__tab-panel--selected {}
+.TableLabel {
+    color: #ffd503;
+    padding-right: 8px;
+}
+
+.TableValue {
+    color: white;
+}
+
+.TableBottom {
+    font-size: 0.85em;
+    padding: 0 10px;
+    margin-left: 10px;
+}
+
+.TableRow:last-child {
+    border-bottom: none;
+    align-self: flex-end;
+}

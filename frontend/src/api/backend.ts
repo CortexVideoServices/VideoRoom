@@ -34,6 +34,14 @@ async function getConference(): Promise<ConferenceData | null> {
   return null;
 }
 
+async function getConferenceById(session_id: string): Promise<ConferenceData | null> {
+  const resp = await fetch(`/backend/conference/${session_id}`);
+  if (resp.ok) {
+    return await resp.json();
+  }
+  return null;
+}
+
 async function startSingUp(email: string) {
   const resp = await fetch('/backend/signup', {
     method: 'POST',
@@ -61,4 +69,5 @@ export default {
   finishSingUp,
   getConference,
   createConference,
+  getConferenceById,
 };

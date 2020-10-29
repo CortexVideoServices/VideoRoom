@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import backend, { ConferenceData, ConferenceValue } from '../api/backend';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { Link } from 'react-router-dom';
+import CopyToClipboard from './CopyToClipboard';
 
 const validate = (values: ConferenceValue) => {
   const errors: Partial<ConferenceValue> = {};
@@ -66,24 +67,61 @@ function CreateConference() {
 }
 
 function ShowConference(data: ConferenceData) {
-  return <div></div>;
+  const url = window.location.origin + `/#/conference/${data.session_id}`;
+  return (
+    <>
+      <h3>Current conference</h3>
+      <div className="Table">
+        <div className="TableRow">
+          <div className="TableLabel">Display name:</div>
+          <div className="TableValue">{data.display_name}</div>
+        </div>
+        <div className="TableRow">
+          <div className="TableValue">{data.description}</div>
+        </div>
+        <div className="TableRow">
+          <div className="TableLabel">Allow anonymous:</div>
+          <div className="TableValue">{data.allow_anonymous ? 'Yes' : 'No'}</div>
+        </div>
+        <div className="TableRow">
+          <div className="TableLabel">Expired at:</div>
+          <div className="TableValue">{data.expired_at}</div>
+        </div>
+        <div className="TableRow">
+          <CopyToClipboard className="TableBottom" value={url}>
+            Copy invitation link to clipboard
+          </CopyToClipboard>
+          <button
+            className="TableBottom"
+            onClick={() => {
+              window.location.href = url;
+            }}
+          >
+            Start conference
+          </button>
+        </div>
+      </div>
+    </>
+  );
 }
 
 function ConferenceDlg() {
   const conference = useRef<ConferenceData | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
 
   useEffect(() => {
     backend
       .getConference()
       .then((data) => {
         conference.current = data;
+        setSessionId(data !== null ? data.session_id : null);
       })
       .catch(() => {
-        conference.current = null;
+        setSessionId(null);
       });
   });
-  if (conference.current === null) return <CreateConference />;
-  else return <ShowConference {...conference.current} />;
+  if (sessionId === null) return <CreateConference />;
+  else return conference.current !== null ? <ShowConference {...conference.current} /> : null;
 }
 
 export default ConferenceDlg;
