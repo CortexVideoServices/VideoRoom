@@ -29,6 +29,13 @@ If you would like to continue, please follow <a href="https://cvs.solutions/#/si
 """
 
 
+class TokenData(dict):
+    """ Token data class """
+
+    def __init__(self, user: User):
+        super().__init__({'user_id': user.id, 'email': user.email, 'display_name': user.display_name})
+
+
 class AuthManager(jwt4auth.aiohttp.AuthManager):
     """ Auth manager
     """
@@ -131,7 +138,7 @@ class Application(web.Application):
         async with db.acquire() as connection:
             query = select([User]).where(User.email == username)
             if user := await(await connection.execute(query)).first():
-                return {'user_id': user.id, 'email': user.email, 'display_name': user.display_name}
+                return TokenData(user)
 
     async def save_refresh_token(self, token_data: Dict, refresh_token: str) -> bool:
         """ Saves refresh token """
@@ -150,7 +157,7 @@ class Application(web.Application):
             query = select([User]).where(User.refresh_token == refresh_token).where(
                 User.token_expired_at > datetime.utcnow())
             if user := await(await connection.execute(query)).first():
-                return {'email': user.email, 'display_name': user.display_name}
+                return TokenData(user)
 
     async def reset_refresh_token(self, token_data):
         """ Reset refresh token """
@@ -204,4 +211,4 @@ class Application(web.Application):
                                               display_name=display_name, started_at=started_at, expired_at=expired_at,
                                               description=description, allow_anonymous=allow_anonymous)
             if (await connection.execute(query)).rowcount:
-                return True
+                return await self.get_conference_by_id(session_id)

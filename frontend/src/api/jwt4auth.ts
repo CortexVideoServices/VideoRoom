@@ -1,11 +1,18 @@
+const REFRESH_TOKEN_STORAGE_KEY = 'refresh_token';
+
 export interface TokenData {
   [index: string]: any;
 }
 
-let refresh_token: string | null = localStorage.getItem('jwt4auth.refresh_token');
+let refresh_token: string | null = localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
 let token_data: TokenData | null = null;
 
-async function login(username: string, password: string) {
+/**
+ * User login (receives access and refresh tokens)
+ * @param username
+ * @param password
+ */
+export async function login(username: string, password: string) {
   const resp = await fetch('/backend/login', {
     method: 'POST',
     headers: {
@@ -15,15 +22,19 @@ async function login(username: string, password: string) {
   });
   if (resp.ok) {
     const data = await resp.json();
-    localStorage.setItem('jwt4auth.refresh_token', data.refresh_token);
+    localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refresh_token);
     refresh_token = data.refresh_token;
     token_data = data.token_data;
+    console.log('$$token_data', token_data); // ToDo: remove this line
     return true;
   }
   return false;
 }
 
-async function refresh() {
+/**
+ * Refreshes access token
+ */
+export async function refresh() {
   if (typeof refresh_token === 'string') {
     const resp = await fetch('/backend/refresh', {
       method: 'POST',
@@ -34,12 +45,13 @@ async function refresh() {
     });
     if (resp.ok) {
       const data = await resp.json();
-      localStorage.setItem('jwt4auth.refresh_token', data.refresh_token);
+      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refresh_token);
       refresh_token = data.refresh_token;
       token_data = data.token_data;
+      console.log('$$token_data', token_data); // ToDo: remove this line
       return true;
     } else {
-      localStorage.removeItem('jwt4auth.refresh_token');
+      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
       refresh_token = null;
       token_data = null;
     }
@@ -47,31 +59,30 @@ async function refresh() {
   return false;
 }
 
-async function logoff() {
+/**
+ * User logoff (Reset access and refresh tokens)
+ */
+export async function logoff() {
   if (typeof refresh_token === 'string') {
     await fetch('/backend/logoff');
-    localStorage.removeItem('jwt4auth.refresh_token');
+    localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
     refresh_token = null;
     token_data = null;
   }
 }
 
-async function getTokenData() {
-  if (typeof refresh_token === 'string' && token_data === null) {
-    await refreshTokenData();
+/**
+ * Returns token data
+ */
+export async function getTokenData() {
+  if (
+    typeof refresh_token === 'string' &&
+    token_data !== null &&
+    'exp' in token_data &&
+    token_data.exp * 1000 > Date.now()
+  ) {
+    return token_data;
   }
+  await refresh();
   return token_data;
 }
-
-async function refreshTokenData() {
-  return refresh();
-}
-
-export default {
-  fetch,
-  login,
-  logoff,
-  getTokenData: getTokenData,
-  refreshTokenData: refreshTokenData,
-  isAuthenticated: () => typeof refresh_token === 'string',
-};

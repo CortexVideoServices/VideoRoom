@@ -63,8 +63,8 @@ async def conference(request: web.Request):
             description = data['description']
         except KeyError as exc:
             raise web.HTTPBadRequest(reason=str(exc))
-        if await app.create_conference(user_id, display_name, description, allow_anonymous):
-            return web.HTTPOk()
+        if result := await app.create_conference(user_id, display_name, description, allow_anonymous):
+            return web.json_response(result, status=201, dumps=lambda obj: json.dumps(obj, cls=JSONEncoder))
     else:
         if result := await app.get_conference(user_id):
             return web.json_response(result, dumps=lambda obj: json.dumps(obj, cls=JSONEncoder))

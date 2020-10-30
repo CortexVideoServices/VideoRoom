@@ -1,5 +1,5 @@
 import React, { PropsWithChildren, useEffect, useState } from 'react';
-import auth, { TokenData } from '../api/jwt4auth';
+import auth, { TokenData } from '../../src/api/jwt4auth';
 
 /// User session context
 export const UserSessionContext = React.createContext<TokenData | null>(null);

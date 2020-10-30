@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import auth from '../api/jwt4auth';
+import auth from '../../src/api/jwt4auth';
 
 interface Values {
   email: string;

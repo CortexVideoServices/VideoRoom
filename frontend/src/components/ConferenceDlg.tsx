@@ -1,127 +1,121 @@
-import React, { useEffect, useRef, useState } from 'react';
-import backend, { ConferenceData, ConferenceValue } from '../api/backend';
+import React, { useContext, useEffect, useState } from 'react';
+import { ConferenceData } from '../api/backend';
+import api from '../api';
+import { UserSessionContext } from './UserSession';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
-import { Link } from 'react-router-dom';
-import CopyToClipboard from './CopyToClipboard';
 
-const validate = (values: ConferenceValue) => {
-  const errors: Partial<ConferenceValue> = {};
-  if (!values.display_name) errors.display_name = 'Required';
-  if (!values.description) errors.description = 'Required';
-  return errors;
-};
-
-function CreateConference() {
-  const [result, setResult] = React.useState(0);
-  if (result === 0)
-    return (
-      <>
-        <p>
-          At the moment, only one current video conference can be created. Enter a description and determine if
-          anonymous users can connect. The invitation link will be active for 15 minutes.
-        </p>
-        <Formik
-          initialValues={{ display_name: '', description: '', allow_anonymous: false }}
-          validate={validate}
-          onSubmit={(values, actions) => {
-            backend
-              .createConference(values)
-              .then((result) => setResult(result ? 1 : 2))
-              .catch(() => setResult(2))
-              .finally(() => actions.setSubmitting(false));
-          }}
-        >
-          <Form>
-            <label htmlFor="display_name">Display name</label>
-            <Field id="display_name" name="display_name" placeholder="Conference display name" />
-            <label htmlFor="description">Conference description</label>
-            <Field
-              id="description"
-              name="description"
-              placeholder="Describe the conference you are creating"
-              component="textarea"
-            />
-            <ErrorMessage name="description" component="div" className="App-dialog-field-error" />
-            <label htmlFor="allow_anonymous">Allow anonymous</label>
-            <Field id="allow_anonymous" name="allow_anonymous" type="checkbox" />
-            <button type="submit">Create</button>
-          </Form>
-        </Formik>
-      </>
-    );
-  else if (result === 1)
-    return (
-      <p>
-        The conference was set up successfully. <Link to="/">Follow this link</Link>.
-      </p>
-    );
-  else
-    return (
-      <p>
-        Something is wrong.{' '}
-        <Link to="/" onClick={() => setResult(0)}>
-          Try to create new conference a little later.
-        </Link>
-      </p>
-    );
+interface ShowProps {
+  className?: string;
+  conference: ConferenceData;
 }
 
-function ShowConference(data: ConferenceData) {
-  const url = window.location.origin + `/#/conference/${data.session_id}`;
+function ShowConference({ className, conference }: ShowProps) {
   return (
-    <>
-      <h3>Current conference</h3>
-      <div className="Table">
-        <div className="TableRow">
-          <div className="TableLabel">Display name:</div>
-          <div className="TableValue">{data.display_name}</div>
+    <div className={className}>
+      <div className="ConferenceInfo">
+        <div className="Row">
+          <div className="Label">Conference:</div>
+          <div className="Value">{conference.display_name}</div>
         </div>
-        <div className="TableRow">
-          <div className="TableValue">{data.description}</div>
+        <div className="Row">
+          <div className="Value">{conference.description}</div>
         </div>
-        <div className="TableRow">
-          <div className="TableLabel">Allow anonymous:</div>
-          <div className="TableValue">{data.allow_anonymous ? 'Yes' : 'No'}</div>
+        <div className="Row">
+          <div className="Label">Allow anonymous:</div>
+          <div className="Value">{conference.allow_anonymous ? 'Yes' : 'No'}</div>
         </div>
-        <div className="TableRow">
-          <div className="TableLabel">Expired at:</div>
-          <div className="TableValue">{data.expired_at}</div>
-        </div>
-        <div className="TableRow">
-          <CopyToClipboard className="TableBottom" value={url}>
-            Copy invitation link to clipboard
-          </CopyToClipboard>
-          <button
-            className="TableBottom"
-            onClick={() => {
-              window.location.href = url;
-            }}
-          >
-            Start conference
-          </button>
+        <div className="Row">
+          <div className="Label">Expired at:</div>
+          <div className="Value">{new Date(conference.expired_at)}</div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
-function ConferenceDlg() {
-  const conference = useRef<ConferenceData | null>(null);
-  const [sessionId, setSessionId] = useState<string | null>(null);
+interface CreateProps {
+  className?: string;
+  setConferenceData: (conference: ConferenceData | null) => void;
+}
 
+function CreateConference({ className, setConferenceData }: CreateProps) {
+  return (
+    <div className={className}>
+      <p>
+        At the moment, only one current video conference can be created. Enter a description and determine if anonymous
+        users can connect.
+      </p>
+      <p>Attention! The time during which you can start the created conference is limited.</p>
+      <Formik
+        initialValues={{ display_name: '', description: '', allow_anonymous: false }}
+        validate={(values) => {
+          const errors: Partial<ConferenceData> = {};
+          if (!values.display_name) errors.display_name = 'Required';
+          if (!values.description) errors.description = 'Required';
+          return errors;
+        }}
+        onSubmit={(values, actions) => {
+          api
+            .createConference(values)
+            .then((result) => setConferenceData(result))
+            .catch(console.log);
+        }}
+      >
+        <Form>
+          <label htmlFor="display_name">Display name</label>
+          <Field id="display_name" name="display_name" placeholder="Conference display name" />
+          <label htmlFor="description">Conference description</label>
+          <Field
+            id="description"
+            name="description"
+            placeholder="Describe the conference you are creating"
+            component="textarea"
+          />
+          <ErrorMessage name="description" component="div" className="App-dialog-field-error" />
+          <label htmlFor="allow_anonymous">Allow anonymous</label>
+          <Field id="allow_anonymous" name="allow_anonymous" type="checkbox" />
+          <button type="submit">Create</button>
+        </Form>
+      </Formik>
+    </div>
+  );
+}
+
+interface Props {
+  className?: string;
+  sessionId?: string;
+}
+
+function ConferenceDlg({ className, sessionId }: Props) {
+  const user = useContext(UserSessionContext);
+  const [conference, setConferenceData] = useState<ConferenceData | null | undefined>(undefined);
   useEffect(() => {
-    backend
-      .getConference()
-      .then((data) => {
-        conference.current = data;
-        setSessionId(data !== null ? data.session_id : null);
+    api
+      .getConferenceData(sessionId)
+      .then((result) => {
+        if (result !== null && conference) {
+          setConferenceData((state) => {
+            Object.assign(state, result);
+            return state;
+          });
+        } else setConferenceData(result);
       })
-      .catch(() => {
-        setSessionId(null);
-      });
+      .catch(console.log);
   });
-  if (sessionId === null) return <CreateConference />;
-  else return conference.current !== null ? <ShowConference {...conference.current} /> : null;
+  if (typeof conference !== 'undefined') {
+    if (conference !== null) {
+      return <ShowConference className={className} conference={conference} />;
+    } else {
+      if (user.authenticated) return <CreateConference className={className} setConferenceData={setConferenceData} />;
+      else
+        return (
+          <div className={className}>
+            <p className="error">The conference is out of date or not available to anonymous. Try to log.</p>
+          </div>
+        );
+    }
+  }
+  return null;
 }
 
 export default ConferenceDlg;

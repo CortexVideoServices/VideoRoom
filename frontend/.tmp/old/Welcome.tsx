@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
 import { Redirect } from 'react-router-dom';
 import { UserSessionContext } from './UsersSession';
-import '../styles/App.css';
-import jwt4auth from '../api/jwt4auth';
+import '../../src/styles/AppOld.css';
+import jwt4auth from '../../src/api/jwt4auth';
 import UsersLogin from './UsersLogin';
 import ConferenceDlg from './ConferenceDlg';
 import UsersSignUp from './UsersSignUp';
