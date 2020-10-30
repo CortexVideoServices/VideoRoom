@@ -14,11 +14,11 @@ function ShowConference({ className, conference }: ShowProps) {
     <div className={className}>
       <div className="ConferenceInfo">
         <div className="Row">
-          <div className="Label">Conference:</div>
+          <div className="Label">Title:</div>
           <div className="Value">{conference.display_name}</div>
         </div>
         <div className="Row">
-          <div className="Value">{conference.description}</div>
+          <div className="Memo">{conference.description}</div>
         </div>
         <div className="Row">
           <div className="Label">Allow anonymous:</div>
@@ -26,7 +26,7 @@ function ShowConference({ className, conference }: ShowProps) {
         </div>
         <div className="Row">
           <div className="Label">Expired at:</div>
-          <div className="Value">{new Date(conference.expired_at)}</div>
+          <div className="Value">{(new Date(conference.expired_at)).toLocaleTimeString()}</div>
         </div>
       </div>
     </div>

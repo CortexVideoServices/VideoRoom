@@ -3,7 +3,7 @@ import hashlib
 import aiohttp
 from typing import Dict, Optional
 from uuid import uuid4
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy import select, insert, update, delete
 from aiohttp import web
 import jwt4auth.aiohttp
@@ -85,7 +85,7 @@ class Application(web.Application):
         async with db.acquire() as connection:
             if not await(await connection.execute(select([User]).where(User.email == email))).first():
                 token = str(uuid4())
-                expired_at = datetime.utcnow() + timedelta(seconds=SIGNUP_TOKEN_EXPIRED)
+                expired_at = datetime.now(timezone.utc) + timedelta(seconds=SIGNUP_TOKEN_EXPIRED)
                 query = insert(RegToken).values(token=token, email=email, expired_at=expired_at)
                 if (await connection.execute(query)).rowcount:
                     message = MIMEText(SIGN_UP_LETTER.format(token), "html", "utf-8")
@@ -100,7 +100,7 @@ class Application(web.Application):
         """
         db = self['db_engine']
         async with db.acquire() as connection:
-            query = select([RegToken]).where(RegToken.token == token).where(RegToken.expired_at > datetime.utcnow())
+            query = select([RegToken]).where(RegToken.token == token).where(RegToken.expired_at > datetime.now(timezone.utc))
             if reg_token := await(await connection.execute(query)).first():
                 return reg_token.email
             raise SignupError('Error #200')
@@ -110,7 +110,7 @@ class Application(web.Application):
         """
         db = self['db_engine']
         async with db.acquire() as connection:
-            query = select([RegToken]).where(RegToken.token == token).where(RegToken.expired_at > datetime.utcnow())
+            query = select([RegToken]).where(RegToken.token == token).where(RegToken.expired_at > datetime.now(timezone.utc))
             if reg_token := await(await connection.execute(query)).first():
                 email = reg_token.email
                 salt = hashlib.sha256(uuid4().bytes).hexdigest()
@@ -144,7 +144,7 @@ class Application(web.Application):
         """ Saves refresh token """
         db = self['db_engine']
         async with db.acquire() as connection:
-            token_expired_at = datetime.utcnow() + timedelta(seconds=REFRESH_TOKEN_EXPIRED)
+            token_expired_at = datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_EXPIRED)
             query = update(User).where(User.email == token_data['email']) \
                 .values(refresh_token=refresh_token, token_expired_at=token_expired_at)
             if (await connection.execute(query)).rowcount > 0:
@@ -155,7 +155,7 @@ class Application(web.Application):
         db = self['db_engine']
         async with db.acquire() as connection:
             query = select([User]).where(User.refresh_token == refresh_token).where(
-                User.token_expired_at > datetime.utcnow())
+                User.token_expired_at > datetime.now(timezone.utc))
             if user := await(await connection.execute(query)).first():
                 return TokenData(user)
 
@@ -172,7 +172,7 @@ class Application(web.Application):
         db = self['db_engine']
         async with db.acquire() as connection:
             query = select([Conference]).where(Conference.user_id == user_id).where(
-                Conference.expired_at > datetime.utcnow())
+                Conference.expired_at > datetime.now(timezone.utc))
             if conference := await(await connection.execute(query)).first():
                 return conference
 
@@ -181,7 +181,7 @@ class Application(web.Application):
         db = self['db_engine']
         async with db.acquire() as connection:
             query = select([Conference]).where(Conference.session_id == session_id).where(
-                Conference.expired_at > datetime.utcnow())
+                Conference.expired_at > datetime.now(timezone.utc))
             if conference := await(await connection.execute(query)).first():
                 return conference
 
@@ -190,7 +190,7 @@ class Application(web.Application):
         if await self.get_conference(user_id):
             return
         session_id = None
-        started_at = datetime.utcnow()
+        started_at = datetime.now(timezone.utc)
         expired_at = started_at + timedelta(seconds=CONFERENCE_EXPIRED)
 
         async with aiohttp.ClientSession(json_serialize=lambda obj: json.dumps(obj, cls=JSONEncoder)) as session:

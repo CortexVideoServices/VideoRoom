@@ -138,10 +138,14 @@
 }
 
 .ConferenceInfo .Label {
-    color: #ffd503;
+    color: #ffffff;
     padding-right: 8px;
 }
 
+.ConferenceInfo .Memo {
+    color: #d4d4d4;
+}
+
 .ConferenceInfo .Value {
-    color: #ffffff;
+    color: #ffd503;
 }
