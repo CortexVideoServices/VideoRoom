@@ -53,7 +53,7 @@
 }
 
 .App-dialog  b {
-    color: #ffd503;
+    color: #ffffff;
     font-weight: normal;
 }
 
@@ -169,4 +169,19 @@
     font-size: 0.9em;
     padding: 4px 10px;
     margin-left: 10px;
+}
+
+.App-conference {
+    display: flex;
+    background: #d4d4d4;
+    min-height: inherit;
+}
+
+.App-conference-title {
+    width: 100%;
+    margin-bottom: 10px;
+    background: #282c34;
+    color: #ffd503;
+    border-bottom: 1px white solid;
+    max-height: 4em;
 }

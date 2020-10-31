@@ -12,14 +12,16 @@ import UserSession from './components/UserSession';
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-      </header>
       <UserSession>
         {({ user, doLogin, doLogoff }) => (
           <Switch>
-            <Route path="/conference/:session_id" children={<Conference />} />
+            <Route path="/conference/:session_id">
+              <Conference />
+            </Route>
             <Route path="*">
+              <header className="App-header">
+                <img src={logo} className="App-logo" alt="logo" />
+              </header>
               <div className="App-dialog">
                 {'authenticated' in user && !user.authenticated && (
                   <>

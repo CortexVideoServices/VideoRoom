@@ -1,8 +1,9 @@
-import jwt4auth from './jwt4auth';
+import jwt4auth, { TokenData } from './jwt4auth';
 
 const fetch = jwt4auth.fetch;
 
 export interface ConferenceData {
+  user?: Partial<TokenData>;
   session_id: string;
   created_at: string;
   display_name: string;

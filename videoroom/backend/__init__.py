@@ -183,7 +183,11 @@ class Application(web.Application):
             query = select([Conference]).where(Conference.session_id == session_id).where(
                 Conference.expired_at > datetime.now(timezone.utc))
             if conference := await(await connection.execute(query)).first():
-                return conference
+                result = dict(conference)
+                query = select([User.email, User.display_name]).where(User.id == conference.user_id)
+                if user := await(await connection.execute(query)).first():
+                    result['user'] = user
+                return result
 
     async def create_conference(self, user_id, display_name, description, allow_anonymous):
         db = self['db_engine']

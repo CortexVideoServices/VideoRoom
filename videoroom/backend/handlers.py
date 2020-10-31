@@ -76,6 +76,9 @@ async def conference(request: web.Request):
 async def conference(request: web.Request):
     app = request.app  # type: Application
     session_id = request.match_info.get('session_id')
+    token_data = request.get('token_data')
     if result := await app.get_conference_by_id(session_id):
+        if token_data is None and not result['allow_anonymous']:
+            return web.json_response({'allow_anonymous': False})
         return web.json_response(result, dumps=lambda obj: json.dumps(obj, cls=JSONEncoder))
     return web.HTTPNotFound()
