@@ -1,15 +1,30 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { ConferenceData } from '../api/backend';
-import api from '../api';
-import { UserSessionContext } from './UserSession';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
+import { useHistory } from 'react-router-dom';
+import { ConferenceData } from '../api/backend';
+import { UserSessionContext } from './UserSession';
+import api from '../api';
 
 interface ShowProps {
   className?: string;
   conference: ConferenceData;
+  updateConference: () => void;
 }
 
-function ShowConference({ className, conference }: ShowProps) {
+function ShowConference({ className, conference, updateConference }: ShowProps) {
+  const history = useHistory();
+  const path = `/conference/${conference.session_id}`;
+  const url = window.location.origin + '/#' + path;
+  const copyToClipboard = () => {
+    navigator.clipboard
+      .writeText(url)
+      .then((result) => alert('Invitation link has copied to clipboard'))
+      .catch(console.error);
+  };
+  useEffect(() => {
+    const timer = setInterval(() => updateConference(), 5 * 1000);
+    return () => clearTimeout(timer);
+  });
   return (
     <div className={className}>
       <div className="ConferenceInfo">
@@ -26,7 +41,15 @@ function ShowConference({ className, conference }: ShowProps) {
         </div>
         <div className="Row">
           <div className="Label">Expired at:</div>
-          <div className="Value">{(new Date(conference.expired_at)).toLocaleTimeString()}</div>
+          <div className="Value">{new Date(conference.expired_at).toLocaleTimeString()}</div>
+        </div>
+        <div className="Row">
+          <button className="TableBottom" onClick={() => copyToClipboard()}>
+            Copy invitation to clipboard
+          </button>
+          <button className="TableBottom" onClick={() => history.push(path)}>
+            Start conference
+          </button>
         </div>
       </div>
     </div>
@@ -89,22 +112,27 @@ interface Props {
 function ConferenceDlg({ className, sessionId }: Props) {
   const user = useContext(UserSessionContext);
   const [conference, setConferenceData] = useState<ConferenceData | null | undefined>(undefined);
+  const updateConference = async () => {
+    const result = await api.getConferenceData(sessionId);
+    if (result !== null && conference) {
+      setConferenceData((state) => {
+        Object.assign(state, result);
+        return state;
+      });
+    } else setConferenceData(result);
+  };
   useEffect(() => {
-    api
-      .getConferenceData(sessionId)
-      .then((result) => {
-        if (result !== null && conference) {
-          setConferenceData((state) => {
-            Object.assign(state, result);
-            return state;
-          });
-        } else setConferenceData(result);
-      })
-      .catch(console.log);
+    updateConference().catch(console.log);
   });
   if (typeof conference !== 'undefined') {
     if (conference !== null) {
-      return <ShowConference className={className} conference={conference} />;
+      return (
+        <ShowConference
+          className={className}
+          conference={conference}
+          updateConference={() => updateConference().catch(console.log)}
+        />
+      );
     } else {
       if (user.authenticated) return <CreateConference className={className} setConferenceData={setConferenceData} />;
       else

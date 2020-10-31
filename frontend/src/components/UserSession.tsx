@@ -53,10 +53,18 @@ function UserSession({ children }: Props) {
       });
     else setUserSessionData(anonymous);
   };
+  const onLogOff = async () => {
+    setUserSessionData(anonymous);
+    if (history.location.pathname !== '/') history.push('/');
+  };
   const doLogin = async (username: string, password: string) => {
     const result: LoginResult = {};
     try {
-      if (await api.login(username, password)) {
+      if (
+        await api.login(username, password, () => {
+          onLogOff();
+        })
+      ) {
         await applyUserData();
         if (history.location.pathname !== '/') history.push('/');
         result.success = true;
@@ -67,12 +75,7 @@ function UserSession({ children }: Props) {
     return result;
   };
   const doLogoff = () => {
-    api.logoff().finally(() => {
-      if (user.authenticated) {
-        setUserSessionData(anonymous);
-        if (history.location.pathname !== '/') history.push('/');
-      }
-    });
+    api.logoff().finally(() => onLogOff());
   };
   useEffect(() => {
     applyUserData();

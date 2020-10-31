@@ -137,6 +137,11 @@
     border-bottom: 1px solid #d4d4d4;
 }
 
+.ConferenceInfo .Row:last-child {
+    border-bottom: none;
+    align-self: flex-end;
+}
+
 .ConferenceInfo .Label {
     color: #ffffff;
     padding-right: 8px;
@@ -148,4 +153,10 @@
 
 .ConferenceInfo .Value {
     color: #ffd503;
+}
+
+.ConferenceInfo button {
+    font-size: 0.9em;
+    padding: 4px 10px;
+    margin-left: 10px;
 }

@@ -1,3 +1,7 @@
+import jwt4auth from './jwt4auth';
+
+const fetch = jwt4auth.fetch;
+
 export interface ConferenceData {
   session_id: string;
   created_at: string;

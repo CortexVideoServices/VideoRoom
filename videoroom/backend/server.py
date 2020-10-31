@@ -13,7 +13,7 @@ class WebApplication(Application):
 
     def __init__(self, prefix, jwt_secret, **kwargs):
         middlewares = kwargs.pop('middlewares', [])
-        auth_manager = AuthManager(jwt_secret, use_cookie='jwt4auth', access_token_ttl=120)
+        auth_manager = AuthManager(jwt_secret, use_cookie='jwt4auth', access_token_ttl=60)
         middlewares.append(auth_manager.middleware)
         settings = dict(prefix=prefix, api_url=kwargs.pop('api_url'), api_key=kwargs.pop('api_key'))
         super().__init__(settings, middlewares=middlewares, **kwargs)
