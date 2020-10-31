@@ -56,3 +56,57 @@ export async function createConference({
   }
   return null;
 }
+
+/**
+ * Returns the email address of the user who started to sign up with this token
+ * or `null` if token is bad or outdated.
+ * @param token
+ */
+export async function getEmailBySignupToken(token: string): Promise<string | null> {
+  const resp = await fetch(`/backend/signup/${token}`);
+  if (resp.ok) {
+    const data = await resp.json();
+    return data.email || null;
+  }
+  return null;
+}
+
+/**
+ * Request to start signup.
+ * @param email
+ */
+export async function startSingUp(email: string) {
+  const resp = await fetch('/backend/signup', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  });
+  return resp.ok;
+}
+
+interface SignupProps {
+  token: string;
+  email: string;
+  display_name: string;
+  password: string;
+}
+
+/**
+ * Request to finish signup
+ * @param email
+ * @param token
+ * @param display_name
+ * @param password
+ */
+export async function finishSingUp({ email, token, display_name, password }: SignupProps) {
+  const resp = await fetch(`/backend/signup/${token}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, token, display_name, password }),
+  });
+  return resp.ok;
+}

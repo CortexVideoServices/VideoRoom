@@ -46,7 +46,6 @@ export async function login(username: string, password: string, onRefreshFail?: 
     localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refresh_token);
     refresh_token = data.refresh_token;
     token_data = data.token_data;
-    console.log('$$token_data', token_data); // ToDo: remove this line
     return true;
   }
   return false;
@@ -69,7 +68,6 @@ export async function refresh() {
       localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, data.refresh_token);
       refresh_token = data.refresh_token;
       token_data = data.token_data;
-      console.log('$$token_data', token_data); // ToDo: remove this line
       return true;
     } else {
       localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);

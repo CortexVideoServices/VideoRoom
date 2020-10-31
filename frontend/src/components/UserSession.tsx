@@ -80,7 +80,6 @@ function UserSession({ children }: Props) {
   useEffect(() => {
     applyUserData();
   });
-  console.log('$user', user); //ToDo:
   return (
     <UserSessionContext.Provider value={user}>{children({ user, doLogin, doLogoff })}</UserSessionContext.Provider>
   );

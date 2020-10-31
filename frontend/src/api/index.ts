@@ -7,4 +7,7 @@ export default {
   getUserData: jwt4auth.getTokenData,
   getConferenceData: backend.getConferenceData,
   createConference: backend.createConference,
+  getEmailBySignupToken: backend.getEmailBySignupToken,
+  startSingUp: backend.startSingUp,
+  finishSingUp: backend.finishSingUp,
 };

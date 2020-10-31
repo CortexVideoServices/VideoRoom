@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Switch, Route, useHistory } from 'react-router-dom';
-import api from './api';
+import React from 'react';
+import { Switch, Route } from 'react-router-dom';
 import logo from './assets/Logo.svg';
 import './styles/App.css';
 import Conference from './components/Conference';

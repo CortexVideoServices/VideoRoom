@@ -1,6 +1,5 @@
 import React from 'react';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
-import api from '../api';
 import { DoLoginFunc } from './UserSession';
 
 interface Values {

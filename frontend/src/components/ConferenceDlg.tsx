@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { useHistory } from 'react-router-dom';
 import { ConferenceData } from '../api/backend';
@@ -81,7 +81,7 @@ function CreateConference({ className, setConferenceData }: CreateProps) {
           api
             .createConference(values)
             .then((result) => setConferenceData(result))
-            .catch(console.log);
+            .catch(console.error);
         }}
       >
         <Form>
@@ -122,7 +122,7 @@ function ConferenceDlg({ className, sessionId }: Props) {
     } else setConferenceData(result);
   };
   useEffect(() => {
-    updateConference().catch(console.log);
+    updateConference().catch(console.error);
   });
   if (typeof conference !== 'undefined') {
     if (conference !== null) {
@@ -130,7 +130,7 @@ function ConferenceDlg({ className, sessionId }: Props) {
         <ShowConference
           className={className}
           conference={conference}
-          updateConference={() => updateConference().catch(console.log)}
+          updateConference={() => updateConference().catch(console.error)}
         />
       );
     } else {

@@ -48,6 +48,16 @@
     }
 }
 
+.App-dialog a {
+    color: #ffd503;
+}
+
+.App-dialog  b {
+    color: #ffd503;
+    font-weight: normal;
+}
+
+
 .App-dialog-tabset {
     width: 100%;
     display: flex;
@@ -120,7 +130,7 @@
 
 .App-dialog-field-error {
     margin-top: 0;
-    font-size: 0.75em;
+    font-size: 0.9em;
     align-self: flex-end;
     color: red;
 }
