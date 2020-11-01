@@ -9,15 +9,45 @@ volumes:
 
 services:
 
+  builder:
+    image: videoroom/builder
+    build:
+      context: .
+      dockerfile: docker/frontend/builder.Dockerfile
+    container_name: videoroom-builder
+
+  frontend:
+    image: videoroom/frontend
+    build:
+      context: ./docker/frontend
+    container_name: videoroom-frontend
+    depends_on:
+      - builder
+    command: nginx
+    ports:
+      - 80:80
+      - 443:443
+    networks:
+      - cvs
+    restart: always
+
   backend:
     image: videoroom/backend
     build:
       context: .
       dockerfile: docker/backend/Dockerfile
       args:
-        - BACKEND_PORT=7000
-        - POSTGRES
+        - BACKEND_PORT=80
+        - SDK_API_URL=http://server/cvs/api
+        - JWT_SECRET
+        - SDK_API_KEY=f657759719b47d7eebbe24893f2ddef30f1cc0a5c3bacad313a4ca07c272bb19
+        - POSTGRES_DSN
+        - MAILER
+    command: python -m videoroom.backend.server
     container_name: videoroom-backend
     networks:
       - cvs
+#    depends_on:
+#      - postgres
+#      - server
     restart: always

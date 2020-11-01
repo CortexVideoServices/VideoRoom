@@ -37,7 +37,6 @@ class Conference(Base):
     __tablename__ = 'conference'
     session_id = Column(String, primary_key=True)
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
-    user = relationship('User', back_populates='conferences')
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     started_at = Column(DateTime, nullable=False, server_default=func.now())
     allow_anonymous = Column(Boolean, nullable=False)

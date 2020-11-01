@@ -12,19 +12,17 @@ settings = {
     'setup_requires': ['setuptools-vcs-version'],
     'packages': find_namespace_packages(),
     'install_requires': [
+        'CVS',
         'jwt4auth',
         'aiohttp==3.6.2',
         'configargparse',
         'SQLAlchemy==1.3.15',
         'psycopg2-binary==2.8.4',
         'aiopg==1.0.0',
-        'aiosmtplib==1.1.1'
-    ]
-}
-
-if 'develop' in sys.argv:
-    settings['install_requires'].extend([
+        'aiosmtplib==1.1.1',
         'alembic',
-    ])
+    ],
+    'dependency_links': ['git+https://github.com/Alesh/jwt4auth.git#egg=jwt4auth']
+}
 
 setup(**settings)

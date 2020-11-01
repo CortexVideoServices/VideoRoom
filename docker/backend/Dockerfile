@@ -1,20 +1,21 @@
-FROM cvs/server
+FROM cvs/python
 
-ARG POSTGRES
-ENV POSTGRES ${POSTGRES}
+ARG POSTGRES_DSN
+ENV POSTGRES_DSN ${POSTGRES_DSN}
 ARG BACKEND_PORT
 ENV BACKEND_PORT ${BACKEND_PORT}
-ARG DEBUG
-ENV DEBUG ${DEBUG:-0}
-
-
-WORKDIR /usr/src/cvs
-RUN python setup.py install
+ARG JWT_SECRET
+ENV JWT_SECRET ${JWT_SECRET}
+ARG SDK_API_KEY
+ENV SDK_API_KEY ${SDK_API_KEY}
+ARG MAILER
+ENV MAILER ${MAILER}
+ARG SDK_API_URL
+ENV SDK_API_URL ${SDK_API_URL:-0}
 
 WORKDIR /usr/src/videoroom
 COPY  . .
 RUN python setup.py install
 
-CMD python -m videoroom.backend
-
-EXPOSE ${BACKEND_PORT}
+# CMD python -m videoroom.backend.server
+# EXPOSE ${BACKEND_PORT}

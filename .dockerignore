@@ -9,3 +9,5 @@ dist
 *.md
 .gitignore
 docker-compose.*
+frontend/node_modules
+docker

@@ -22,10 +22,10 @@ class WebApplication(Application):
 
     @classmethod
     async def factory(cls, postgres_dsn, prefix, api_url, api_key, jwt_secret, mailer, debug=False, **kwargs):
-        db_engine = await create_engine(postgres_dsn)
         logging.basicConfig(level=(logging.DEBUG if debug else logging.WARNING))
-        kwargs.update(dict(api_url=api_url, api_key=api_key, mailer=mailer))
-        obj = cls(prefix, jwt_secret, logger=logging.root, **kwargs)
+        db_engine = await create_engine(postgres_dsn)
+        kwargs.update(dict(api_url=api_url, api_key=api_key, mailer=mailer,logger=logging.root))
+        obj = cls(prefix, jwt_secret, **kwargs)
         obj['db_engine'] = db_engine
         async with aiohttp.ClientSession() as session:
             try:
