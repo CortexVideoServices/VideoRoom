@@ -173,15 +173,69 @@
 
 .App-conference {
     display: flex;
-    background: #d4d4d4;
-    min-height: inherit;
+    background: #282c34;
+    flex-wrap: wrap;
 }
 
 .App-conference-title {
     width: 100%;
     margin-bottom: 10px;
-    background: #282c34;
+    background: #6d6e70;
     color: #ffd503;
     border-bottom: 1px white solid;
     max-height: 4em;
+    display: flex;
+}
+
+.App-conference-title .text {
+    width: 100%
+}
+
+.App-conference-title .icon {
+    color: white;
+    align-self: center;
+}
+
+.App-conference-panel {
+    margin: 0 auto;
+    max-width: 1600px;
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 1.5em;
+}
+
+.streamBox {
+    margin: 13px 2px 2px 2px;
+    padding: 13px 2px 2px 2px;
+    border: 3px double gray;
+}
+
+.streamControl {
+    display: block;
+    position: absolute;
+    margin-top: -30px;
+}
+
+.streamControl > div {
+    padding: 0 10px;
+    margin: 0;
+    position: relative;
+    background: #6d6e70;
+}
+
+.streamControl > div > div {
+    display: inline-block;
+}
+
+.streamControl > div > div > img {
+    vertical-align: text-top;
+    margin-left: 4px;
+    width: 1.2em;
+    height: 1.2em;
+}
+
+.streamView {
+    display: block;
+    width: 480px;
+    height: 350px;
 }
