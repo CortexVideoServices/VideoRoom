@@ -1,4 +1,3 @@
-import sys
 from setuptools import setup, find_namespace_packages
 
 settings = {
@@ -13,8 +12,8 @@ settings = {
     'packages': find_namespace_packages(),
     'install_requires': [
         'CVS',
-        'jwt4auth',
-        'aiohttp==3.6.2',
+        'jwt4auth>=0.1.5',
+        'aiohttp==3.7.2',
         'configargparse',
         'SQLAlchemy==1.3.15',
         'psycopg2-binary==2.8.4',

@@ -59,7 +59,7 @@
     ]
   },
   "dependencies": {
-    "@cvss/classes": "^0.1.3",
-    "@cvss/react": "^0.1.3"
+    "@cvss/react": "^0.1.3",
+    "@jwt4auth/reactjs": "^0.1.5"
   }
 }

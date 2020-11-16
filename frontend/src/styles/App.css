@@ -204,6 +204,17 @@
     font-size: 1.5em;
 }
 
+.LoginForm-end-line {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.LoginForm-end-line a {
+    align-self: flex-end;
+    font-size: 0.9em;
+}
+
 .streamBox {
     margin: 13px 2px 2px 2px;
     padding: 13px 2px 2px 2px;

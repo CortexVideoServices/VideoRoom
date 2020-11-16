@@ -2,9 +2,11 @@ import logging
 import aiohttp
 from aiohttp import web
 from aiopg.sa import create_engine
-from jwt4auth.aiohttp import with_prefix
+from cvs.web import with_prefix
+
 from . import Application, AuthManager
 from .handlers import routes
+from ..utils import Mailer
 
 
 class WebApplication(Application):
@@ -12,13 +14,14 @@ class WebApplication(Application):
     """
 
     def __init__(self, prefix, jwt_secret, **kwargs):
-        middlewares = kwargs.pop('middlewares', [])
-        auth_manager = AuthManager(jwt_secret, use_cookie='jwt4auth', access_token_ttl=60)
-        middlewares.append(auth_manager.middleware)
+        mailer = kwargs.pop('mailer')
+        auth_manager = AuthManager(self, jwt_secret, use_cookie='jwt4auth', access_token_ttl=60)
+        middlewares = list(kwargs.pop('middlewares', [])) + [auth_manager.middleware]
         settings = dict(prefix=prefix, api_url=kwargs.pop('api_url'), api_key=kwargs.pop('api_key'))
         super().__init__(settings, middlewares=middlewares, **kwargs)
         self.add_routes(with_prefix(prefix, routes))
         self.add_routes(with_prefix(prefix, auth_manager.routes))
+        self['mailer']  = Mailer(mailer)
 
     @classmethod
     async def factory(cls, postgres_dsn, prefix, api_url, api_key, jwt_secret, mailer, debug=False, **kwargs):

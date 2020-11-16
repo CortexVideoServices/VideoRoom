@@ -1,24 +1,20 @@
 import json
 import hashlib
 import aiohttp
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 from uuid import uuid4
 from datetime import datetime, timedelta, timezone
 from sqlalchemy import select, insert, update, delete
 from aiohttp import web
 import jwt4auth.aiohttp
 from cvs.web.utils import JSONEncoder
-from ..utils import Mailer, MIMEText
+from ..utils import MIMEText
 from ..models import User, RegToken, Conference
 
 SIGNUP_TOKEN_EXPIRED = 15 * 60
+RENEW_TOKEN_EXPIRED = 15 * 60
 REFRESH_TOKEN_EXPIRED = 30 * 60
 CONFERENCE_EXPIRED = 15 * 60
-
-
-class SignupError(Exception):
-    """ Signup error"""
-
 
 SIGN_UP_LETTER = """
 <html><body>
@@ -28,9 +24,17 @@ If you would like to continue, please follow <a href="https://cvs.solutions/#/si
 </body></html>
 """
 
+RENEW_LETTER = """
+<html><body>
+<p>Hi!<p> 
+<p>You can see this email because you started password recovery for the <b>VideoRoom</b> app. 
+If you would like to continue, please follow <a href="https://cvs.solutions/#/renew/{0}">this link</a>.
+</body></html>
+"""
 
-class TokenData(dict):
-    """ Token data class """
+
+class UserData(dict):
+    """ User data class """
 
     def __init__(self, user: User):
         super().__init__({'user_id': user.id, 'email': user.email, 'display_name': user.display_name})
@@ -40,26 +44,25 @@ class AuthManager(jwt4auth.aiohttp.AuthManager):
     """ Auth manager
     """
 
-    async def check_credential(self, app: 'Application', username: str, password: str):
-        return await app.check_credential(username, password)
+    def __init__(self, app, secret, **kwargs):
+        super().__init__(secret, **kwargs)
+        self.app = app
 
-    async def create_token_data(self, app: 'Application', username: str) -> Dict:
-        if token_data := await app.create_token_data(username):
-            return token_data
-        raise ValueError()
+    async def check_credential(self, username: str, password: str) -> bool:
+        return await self.app.check_credential(username, password)
 
-    async def save_refresh_token(self, app: 'Application', token_data: Dict, refresh_token: str):
-        if not await app.save_refresh_token(token_data, refresh_token):
-            raise RuntimeError("Cannot save refresh token")
+    async def get_user_data(self, username: Union[int, str]) -> Optional[Dict]:
+        if user_data := await self.app.create_user_data(username):
+            return user_data
 
-    async def check_refresh_token(self, app: 'Application', refresh_token: str) -> Dict:
-        if token_data := await app.check_refresh_token(refresh_token):
-            return token_data
-        raise ValueError()
+    async def save_refresh_token(self, user_data: Dict, refresh_token: str) -> bool:
+        return self.app.save_refresh_token(user_data, refresh_token)
 
-    async def reset_refresh_token(self, app: 'Application', token_data: Dict):
-        if not await app.reset_refresh_token(token_data):
-            raise RuntimeError("Cannot reset refresh token")
+    async def check_refresh_token(self, user_data: Dict, refresh_token: str) -> bool:
+        return self.app.check_refresh_token(user_data, refresh_token)
+
+    async def reset_refresh_token(self, user_data: Dict) -> bool:
+        return self.app.reset_refresh_token(user_data)
 
     @staticmethod
     def salt_value(salt, value):
@@ -73,7 +76,6 @@ class Application(web.Application):
     """
 
     def __init__(self, settings: Dict, **kwargs):
-        self.mailer = Mailer(kwargs.pop('mailer'))
         super().__init__(**kwargs)
         self.settings = settings
         self.status = 'OK'
@@ -82,6 +84,7 @@ class Application(web.Application):
         """ Stage #1 of account registration
         """
         db = self['db_engine']
+        mailer = self['mailer']
         async with db.acquire() as connection:
             if not await(await connection.execute(select([User]).where(User.email == email))).first():
                 token = str(uuid4())
@@ -89,28 +92,30 @@ class Application(web.Application):
                 query = insert(RegToken).values(token=token, email=email, expired_at=expired_at)
                 if (await connection.execute(query)).rowcount:
                     message = MIMEText(SIGN_UP_LETTER.format(token), "html", "utf-8")
-                    await self.mailer.send(self.mailer.kwargs['username'], email, "Invitation to sign up", message)
+                    await mailer.send(mailer.kwargs['username'], email, "Invitation to sign up", message)
                     # ToDo: send registration mail
                     return token
-                raise SignupError('Error #101')
-            raise SignupError('Error #100')
+                raise web.HTTPInternalServerError(reason="Cannot save signup token")
+            raise web.HTTPNotFound()
 
     async def signup_email(self, token: str) -> Optional[str]:
         """ Gets email for given token
         """
         db = self['db_engine']
         async with db.acquire() as connection:
-            query = select([RegToken]).where(RegToken.token == token).where(RegToken.expired_at > datetime.now(timezone.utc))
+            query = select([RegToken]).where(RegToken.token == token).where(
+                RegToken.expired_at > datetime.now(timezone.utc))
             if reg_token := await(await connection.execute(query)).first():
                 return reg_token.email
-            raise SignupError('Error #200')
+            raise web.HTTPBadRequest(reason="Wrong token")
 
     async def signup_finish(self, token: str, display_name: str, password: str) -> Optional[bool]:
         """ Stage #2 of account registration
         """
         db = self['db_engine']
         async with db.acquire() as connection:
-            query = select([RegToken]).where(RegToken.token == token).where(RegToken.expired_at > datetime.now(timezone.utc))
+            query = select([RegToken]).where(RegToken.token == token).where(
+                RegToken.expired_at > datetime.now(timezone.utc))
             if reg_token := await(await connection.execute(query)).first():
                 email = reg_token.email
                 salt = hashlib.sha256(uuid4().bytes).hexdigest()
@@ -118,8 +123,8 @@ class Application(web.Application):
                 query = insert(User).values(email=email, salt=salt, password=password, display_name=display_name)
                 if (await connection.execute(query)).rowcount > 0:
                     return True
-                raise SignupError('Error #201')
-            raise SignupError('Error #200')
+                raise web.HTTPInternalServerError(reason="Cannot save new user")
+            web.HTTPBadRequest(reason="Wrong token")
 
     async def check_credential(self, username: str, password: str) -> Optional[bool]:
         """ Checks user credential
@@ -131,41 +136,45 @@ class Application(web.Application):
                 if AuthManager.salt_value(password, user.salt) == user.password:
                     return True
 
-    async def create_token_data(self, username: str) -> Optional[Dict]:
-        """ Creates token data
+    async def create_user_data(self, username: str) -> Optional[UserData]:
+        """ Creates user data
         """
         db = self['db_engine']
         async with db.acquire() as connection:
             query = select([User]).where(User.email == username)
             if user := await(await connection.execute(query)).first():
-                return TokenData(user)
+                return UserData(user)
 
-    async def save_refresh_token(self, token_data: Dict, refresh_token: str) -> bool:
+    async def save_refresh_token(self, user_data: UserData, refresh_token: str) -> bool:
         """ Saves refresh token """
         db = self['db_engine']
         async with db.acquire() as connection:
             token_expired_at = datetime.now(timezone.utc) + timedelta(seconds=REFRESH_TOKEN_EXPIRED)
-            query = update(User).where(User.email == token_data['email']) \
+            query = update(User).where(User.email == user_data['email']) \
                 .values(refresh_token=refresh_token, token_expired_at=token_expired_at)
             if (await connection.execute(query)).rowcount > 0:
                 return True
+        return False
 
-    async def check_refresh_token(self, refresh_token) -> Optional[Dict]:
+    async def check_refresh_token(self, user_data: UserData, refresh_token: str) -> bool:
         """ Checks refresh token """
         db = self['db_engine']
         async with db.acquire() as connection:
             query = select([User]).where(User.refresh_token == refresh_token).where(
                 User.token_expired_at > datetime.now(timezone.utc))
             if user := await(await connection.execute(query)).first():
-                return TokenData(user)
+                if user.id == user_data['user_id']:
+                    return True
+        return False
 
-    async def reset_refresh_token(self, token_data):
+    async def reset_refresh_token(self, user_data: UserData) -> bool:
         """ Reset refresh token """
         db = self['db_engine']
         async with db.acquire() as connection:
-            query = update(User).where(User.email == token_data['email']).values(refresh_token=None)
+            query = update(User).where(User.id == user_data['user_id']).values(refresh_token=None)
             if (await connection.execute(query)).rowcount > 0:
                 return True
+        return False
 
     async def get_conference(self, user_id):
         """ Return current conference if exists """
@@ -216,3 +225,43 @@ class Application(web.Application):
                                               description=description, allow_anonymous=allow_anonymous)
             if (await connection.execute(query)).rowcount:
                 return await self.get_conference_by_id(session_id)
+
+    async def renew_start(self, email: str) -> Optional[str]:
+        """ Stage #1 password renew
+        """
+        db = self['db_engine']
+        mailer = self['mailer']
+        async with db.acquire() as connection:
+            if await(await connection.execute(select([User]).where(User.email == email))).first():
+                token = str(uuid4())
+                expired_at = datetime.now(timezone.utc) + timedelta(seconds=RENEW_TOKEN_EXPIRED)
+                query = insert(RegToken).values(token=token, email=email, expired_at=expired_at)
+                if (await connection.execute(query)).rowcount:
+                    message = MIMEText(RENEW_LETTER.format(token), "html", "utf-8")
+                    await mailer.send(mailer.kwargs['username'], email, "Invitation to password renew", message)
+                    return token
+                raise web.HTTPInternalServerError(reason="Cannot save renew token")
+            raise web.HTTPNotFound()
+
+
+    async def renew_email(self, token: str) -> Optional[str]:
+        """ Gets email for given renew token
+        """
+        return await self.signup_email(token)
+
+    async def renew_finish(self, token: str, password: str) -> Optional[bool]:
+        """ Stage #2 of password renew
+        """
+        db = self['db_engine']
+        async with db.acquire() as connection:
+            query = select([RegToken]).where(RegToken.token == token).where(
+                RegToken.expired_at > datetime.now(timezone.utc))
+            if reg_token := await(await connection.execute(query)).first():
+                email = reg_token.email
+                salt = hashlib.sha256(uuid4().bytes).hexdigest()
+                password = AuthManager.salt_value(password, salt)
+                query = update(User).where(User.email==email).values(salt=salt, password=password)
+                if (await connection.execute(query)).rowcount > 0:
+                    return True
+                raise web.HTTPInternalServerError(reason="Cannot update password")
+            raise web.HTTPBadRequest(reason="Wrong renew token")

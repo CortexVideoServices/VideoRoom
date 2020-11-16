@@ -1,9 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react';
 import logo from '../assets/Logo.svg';
 import { Link, useParams, useHistory } from 'react-router-dom';
-import { ConferenceData } from '../api/backend';
-import { UserSessionContext } from './UserSession';
-import api from '../api';
+import { ConferenceData } from '../api';
+import { UserSessionContext } from '@jwt4auth/reactjs';
+import * as api from '../api';
 import { Session, Publisher, Incoming, LocalStream, RemoteStream, Video } from '@cvss/react';
 import switch_cam from '../assets/switch_cam.svg';
 import mute_cam from '../assets/mute-cam.svg';
@@ -23,7 +23,7 @@ function defaultUrl(): string {
 function Conference() {
   const history = useHistory();
   const { session_id: sessionId } = useParams();
-  const user = useContext(UserSessionContext);
+  const session = useContext(UserSessionContext);
   const [conference, setConferenceData] = useState<ConferenceData | null | undefined>(undefined);
   useEffect(() => {
     api
@@ -40,15 +40,15 @@ function Conference() {
   });
   const allowed = () => {
     if (conference) {
-      if (!user.authenticated) {
+      if (!session.user) {
         return conference.allow_anonymous;
       } else return true;
     }
     return false;
   };
   let participantName = 'Anonymous';
-  if (user.authenticated) {
-    participantName = `${user.display_name}<${user.email}>`;
+  if (session.user) {
+    participantName = `${session.user.display_name}<${session.user.email}>`;
   }
 
   return allowed() ? (

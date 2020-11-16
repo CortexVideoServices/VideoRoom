@@ -1,8 +1,8 @@
 import json
 from aiohttp import web
 from cvs.web.utils import JSONEncoder
-from . import Application, SignupError
-from jwt4auth.aiohttp.handlers import authenticated
+from . import Application
+from jwt4auth.aiohttp import authenticated
 
 routes = web.RouteTableDef()
 
@@ -14,8 +14,11 @@ async def get_status(request: web.Request):
 
 
 @routes.post('/signup')
+@routes.post('/renew')
 @routes.get('/signup/{token}')
+@routes.get('/renew/{token}')
 @routes.post('/signup/{token}')
+@routes.post('/renew/{token}')
 async def signup(request: web.Request):
     app = request.app  # type: Application
     token = request.match_info.get('token')
@@ -23,25 +26,28 @@ async def signup(request: web.Request):
         data = await request.json()
     else:
         data = await request.post()
-    try:
-        if not token:
-            # Stage #1 of account registration
-            email = data['email']
-            if await app.signup_start(email):
-                return web.HTTPOk()
+    if not token:
+        # Stage #1 of account registration
+        email = data['email']
+        start_coro = app.signup_start(email) if request.path.endswith('/signup') else app.renew_start(email)
+        if await start_coro:
+            return web.HTTPOk()
+    else:
+        if request.method != 'POST':
+            email_coro = app.signup_email(token) if '/signup/' in request.path else app.renew_email(token)
+            email = await email_coro
+            if email:
+                return web.json_response({'email': email})
         else:
-            if request.method != 'POST':
-                email = await app.signup_email(token)
-                if email:
-                    return web.json_response({'email': email})
-            else:
-                # stage #2 of signup
-                password = data['password']
+            # stage #2 of signup
+            password = data['password']
+            if '/signup/' in request.path:
                 display_name = data.get('display_name')
-                if await app.signup_finish(token, display_name, password):
-                    return web.HTTPCreated()
-    except SignupError as exc:
-        return web.HTTPBadRequest(reason=str(exc))
+                finish_coro = app.signup_finish(token, display_name, password)
+            else:
+                finish_coro = app.renew_finish(token, password)
+            if await finish_coro:
+                return web.HTTPCreated()
     return web.HTTPUnprocessableEntity()
 
 
@@ -50,8 +56,8 @@ async def signup(request: web.Request):
 @routes.post('/conference')
 async def conference(request: web.Request):
     app = request.app  # type: Application
-    token_data = request['token_data']
-    user_id = token_data['user_id']
+    user_data = request['user_data']
+    user_id = user_data['user_id']
     if request.method == 'POST':
         if request.content_type.startswith('application/json'):
             data = await request.json()
@@ -76,9 +82,9 @@ async def conference(request: web.Request):
 async def conference(request: web.Request):
     app = request.app  # type: Application
     session_id = request.match_info.get('session_id')
-    token_data = request.get('token_data')
+    user_data = request.get('user_data')
     if result := await app.get_conference_by_id(session_id):
-        if token_data is None and not result['allow_anonymous']:
+        if user_data is None and not result['allow_anonymous']:
             return web.json_response({'allow_anonymous': False})
         return web.json_response(result, dumps=lambda obj: json.dumps(obj, cls=JSONEncoder))
     return web.HTTPNotFound()

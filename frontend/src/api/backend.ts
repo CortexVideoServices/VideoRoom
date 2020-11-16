@@ -1,9 +1,9 @@
-import jwt4auth, { TokenData } from './jwt4auth';
+import jwt4auth, { UserData } from '@jwt4auth/general';
 
 const fetch = jwt4auth.fetch;
 
 export interface ConferenceData {
-  user?: Partial<TokenData>;
+  user?: Partial<UserData>;
   session_id: string;
   created_at: string;
   display_name: string;
@@ -76,7 +76,7 @@ export async function getEmailBySignupToken(token: string): Promise<string | nul
  * Request to start signup.
  * @param email
  */
-export async function startSingUp(email: string) {
+export async function startSignup(email: string) {
   const resp = await fetch('/backend/signup', {
     method: 'POST',
     headers: {
@@ -87,7 +87,7 @@ export async function startSingUp(email: string) {
   return resp.ok;
 }
 
-interface SignupProps {
+export interface SignupData {
   token: string;
   email: string;
   display_name: string;
@@ -101,7 +101,7 @@ interface SignupProps {
  * @param display_name
  * @param password
  */
-export async function finishSingUp({ email, token, display_name, password }: SignupProps) {
+export async function finishSignup({ email, token, display_name, password }: SignupData) {
   const resp = await fetch(`/backend/signup/${token}`, {
     method: 'POST',
     headers: {
@@ -111,3 +111,57 @@ export async function finishSingUp({ email, token, display_name, password }: Sig
   });
   return resp.ok;
 }
+
+
+/**
+ * Returns the email address of the user who started to renew password with this token
+ * or `null` if token is bad or outdated.
+ * @param token
+ */
+export async function getEmailByRenewToken(token: string): Promise<string | null> {
+  const resp = await fetch(`/backend/renew/${token}`);
+  if (resp.ok) {
+    const data = await resp.json();
+    return data.email || null;
+  }
+  return null;
+}
+
+/**
+ * Request to start renew password.
+ * @param email
+ */
+export async function startRenew(email: string) {
+  const resp = await fetch('/backend/renew', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email }),
+  });
+  return resp.ok;
+}
+
+export interface RenewData {
+  token: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * Request to finish renew
+ * @param email
+ * @param token
+ * @param password
+ */
+export async function finishRenew({ email, token, password }: RenewData) {
+  const resp = await fetch(`/backend/renew/${token}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ email, token, password }),
+  });
+  return resp.ok;
+}
+

@@ -1,87 +1,32 @@
 import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import jwt4auth from '@jwt4auth/general';
+import { UserSession, UserSessionContext } from '@jwt4auth/reactjs';
+import { Route, Switch } from 'react-router-dom';
+import Conference from './views/Conference';
 import logo from './assets/Logo.svg';
 import './styles/App.css';
-import Conference from './components/Conference';
-import { RoutedTab, RoutedTabs } from './components/RoutedTabs';
-import LoginForm from './components/LoginForm';
-import SignupForm from './components/SignupForm';
-import ConferenceDlg from './components/ConferenceDlg';
-import UserSession from './components/UserSession';
+import UserDialog from './views/UserDialog';
+import ConferenceDialog from './views/ConferenceDialog';
 
 function App() {
+  jwt4auth.setup({ uriPrefix: '/backend'});
   return (
     <div className="App">
       <UserSession>
-        {({ user, doLogin, doLogoff }) => (
-          <Switch>
-            <Route path="/conference/:session_id">
-              <Conference />
-            </Route>
-            <Route path="*">
-              <header className="App-header">
-                <img src={logo} className="App-logo" alt="logo" />
-              </header>
-              <div className="App-dialog">
-                {'authenticated' in user && !user.authenticated && (
-                  <>
-                    <RoutedTabs className="App-dialog-tabset">
-                      <RoutedTab
-                        path={['/login', '/']}
-                        className="App-dialog-tab"
-                        label={
-                          <>
-                            I have
-                            <br />
-                            an account
-                          </>
-                        }
-                      >
-                        <LoginForm className="App-dialog-panel" doLogin={doLogin} />
-                      </RoutedTab>
-                      <RoutedTab
-                        path={['/signup', '/signup/:token']}
-                        className="App-dialog-tab"
-                        label={
-                          <>
-                            I haven't
-                            <br />
-                            an account
-                          </>
-                        }
-                      >
-                        <SignupForm className="App-dialog-panel" />
-                      </RoutedTab>
-                    </RoutedTabs>
-                  </>
-                )}
-                {'authenticated' in user && user.authenticated && (
-                  <>
-                    <RoutedTabs className="App-dialog-tabset">
-                      <RoutedTab
-                        path="/"
-                        className="App-dialog-tab"
-                        label={
-                          <>
-                            Video
-                            <br />
-                            conference
-                          </>
-                        }
-                      >
-                        <ConferenceDlg className="App-dialog-panel" />
-                      </RoutedTab>
-                      <div className="App-dialog-tab" onClick={() => doLogoff()}>
-                        Logoff
-                      </div>
-                    </RoutedTabs>
-                  </>
-                )}
-              </div>
-            </Route>
-          </Switch>
-        )}
-      </UserSession>{' '}
+        <Switch>
+          <Route path="/conference/:session_id">
+            <Conference />
+          </Route>
+          <Route path="*">
+            <header className="App-header">
+              <img src={logo} className="App-logo" alt="logo" />
+            </header>
+            <UserSessionContext.Consumer>
+              {(session) => (session.user ? <ConferenceDialog /> : <UserDialog />)}
+            </UserSessionContext.Consumer>
+          </Route>
+        </Switch>
+      </UserSession>
     </div>
   );
 }

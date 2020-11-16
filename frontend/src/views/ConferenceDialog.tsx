@@ -2,8 +2,8 @@ import React, { useContext, useEffect, useState } from 'react';
 import { ErrorMessage, Field, Form, Formik } from 'formik';
 import { useHistory } from 'react-router-dom';
 import { ConferenceData } from '../api/backend';
-import { UserSessionContext } from './UserSession';
-import api from '../api';
+import { UserSessionContext } from '@jwt4auth/reactjs';
+import * as api from '../api';
 
 interface ShowProps {
   className?: string;
@@ -22,7 +22,7 @@ function ShowConference({ className, conference, updateConference }: ShowProps) 
       .catch(console.error);
   };
   useEffect(() => {
-    const timer = setInterval(() => updateConference(), 5 * 1000);
+    const timer = setInterval(() => updateConference(), 15 * 1000);
     return () => clearTimeout(timer);
   });
   return (
@@ -109,8 +109,8 @@ interface Props {
   sessionId?: string;
 }
 
-function ConferenceDlg({ className, sessionId }: Props) {
-  const user = useContext(UserSessionContext);
+function ConferenceDialog({ className, sessionId }: Props) {
+  const session = useContext(UserSessionContext);
   const [conference, setConferenceData] = useState<ConferenceData | null | undefined>(undefined);
   const updateConference = async () => {
     const result = await api.getConferenceData(sessionId);
@@ -124,26 +124,45 @@ function ConferenceDlg({ className, sessionId }: Props) {
   useEffect(() => {
     updateConference().catch(console.error);
   });
-  if (typeof conference !== 'undefined') {
-    if (conference !== null) {
-      return (
-        <ShowConference
-          className={className}
-          conference={conference}
-          updateConference={() => updateConference().catch(console.error)}
-        />
-      );
-    } else {
-      if (user.authenticated) return <CreateConference className={className} setConferenceData={setConferenceData} />;
-      else
+
+  const children = () => {
+    if (typeof conference !== 'undefined') {
+      if (conference !== null) {
         return (
-          <div className={className}>
-            <p className="error">The conference is out of date or not available to anonymous. Try to log.</p>
-          </div>
+          <ShowConference
+            className={className}
+            conference={conference}
+            updateConference={() => updateConference().catch(console.error)}
+          />
         );
+      } else {
+        if (session.user) return <CreateConference className={className} setConferenceData={setConferenceData} />;
+        else
+          return (
+            <div className={className}>
+              <p className="error">The conference is out of date or not available to anonymous. Try to log.</p>
+            </div>
+          );
+      }
     }
-  }
-  return null;
+    return null;
+  };
+
+  return (
+    <div className="App-dialog">
+      <div className="App-dialog-tabset">
+        <div className="App-dialog-tab selected">
+          Video
+          <br />
+          conference
+        </div>
+        <div className="App-dialog-tab" onClick={() => session.logoff()}>
+          Logoff
+        </div>
+      </div>
+      <div className="App-dialog-panel">{children()}</div>
+    </div>
+  );
 }
 
-export default ConferenceDlg;
+export default ConferenceDialog;
