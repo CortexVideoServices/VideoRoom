@@ -56,13 +56,13 @@ class AuthManager(jwt4auth.aiohttp.AuthManager):
             return user_data
 
     async def save_refresh_token(self, user_data: Dict, refresh_token: str) -> bool:
-        return self.app.save_refresh_token(user_data, refresh_token)
+        return await self.app.save_refresh_token(user_data, refresh_token)
 
     async def check_refresh_token(self, user_data: Dict, refresh_token: str) -> bool:
-        return self.app.check_refresh_token(user_data, refresh_token)
+        return await self.app.check_refresh_token(user_data, refresh_token)
 
     async def reset_refresh_token(self, user_data: Dict) -> bool:
-        return self.app.reset_refresh_token(user_data)
+        return await self.app.reset_refresh_token(user_data)
 
     @staticmethod
     def salt_value(salt, value):
@@ -195,7 +195,7 @@ class Application(web.Application):
                 result = dict(conference)
                 query = select([User.email, User.display_name]).where(User.id == conference.user_id)
                 if user := await(await connection.execute(query)).first():
-                    result['user'] = user
+                    result['user_data'] = UserData(user)
                 return result
 
     async def create_conference(self, user_id, display_name, description, allow_anonymous):
