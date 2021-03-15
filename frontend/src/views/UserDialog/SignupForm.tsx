@@ -140,7 +140,7 @@ export default function () {
   });
   return (
     <div className="App-dialog">
-      <TabSet tabindex={0} />
+      <TabSet tabindex={1} />
       <div className="App-dialog-panel">
         {!token ? (
           <Start />

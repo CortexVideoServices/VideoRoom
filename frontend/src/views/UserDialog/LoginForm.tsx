@@ -21,7 +21,7 @@ function LoginForm() {
   const session = useContext(UserSessionContext);
   return (
     <div className="App-dialog">
-      <TabSet tabindex={0} />
+      <h2>Sign in</h2>
       <Formik
         initialValues={{ email: '', password: '' }}
         validate={validate}
@@ -30,9 +30,11 @@ function LoginForm() {
         }}
       >
         <Form className="App-dialog-panel">
+
           <label htmlFor="email">Yor email address</label>
           <Field id="email" name="email" placeholder="EMail" />
           <ErrorMessage name="email" component="div" className="App-dialog-field-error" />
+
           <label htmlFor="password">Password</label>
           <Field id="password" name="password" placeholder="Password" type="password" />
           <ErrorMessage name="password" component="div" className="App-dialog-field-error" />
@@ -43,6 +45,8 @@ function LoginForm() {
           <div className="App-dialog-field-error">{error}</div>
         </Form>
       </Formik>
+
+      <TabSet tabindex={0} />
     </div>
   );
 }
