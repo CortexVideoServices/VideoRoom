@@ -62,7 +62,7 @@ function Start() {
         </p>
       ) : (
         <p>
-          Start of renew password fail. Something is wrong. <br />
+          <span className="error-text">Start of renew password fail. Something is wrong.</span> <br />
           Try to{' '}
           <Link to="/renew" onClick={() => setResult(undefined)}>
             renew password
@@ -133,7 +133,7 @@ export default function () {
   });
   return (
     <div className="App-dialog">
-      <TabSet tabindex={0} />
+      <h2>Forgot password</h2>
       <div className="App-dialog-panel">
         {!token ? (
           <Start />
@@ -146,6 +146,7 @@ export default function () {
           <Finish token={token} email={email} />
         )}
       </div>
+      <TabSet tabindex={0} />
     </div>
   );
 }

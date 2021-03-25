@@ -43,6 +43,7 @@ function Start() {
   };
   return (
     <>
+      <h2>Register new account</h2>
       <p>
         We will create a registration invitation for you and send it to your email. The invitation is limited in time,
         so as soon as possible, follow the link received in the letter to complete the account registration.
@@ -140,7 +141,6 @@ export default function () {
   });
   return (
     <div className="App-dialog">
-      <TabSet tabindex={1} />
       <div className="App-dialog-panel">
         {!token ? (
           <Start />
@@ -153,6 +153,7 @@ export default function () {
           <Finish token={token} email={email} />
         )}
       </div>
+      <TabSet tabindex={1} />
     </div>
   );
 }
