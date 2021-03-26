@@ -43,6 +43,7 @@ function Start() {
   };
   return (
     <>
+      <h2>Register new account</h2>
       <p>
         We will create a registration invitation for you and send it to your email. The invitation is limited in time,
         so as soon as possible, follow the link received in the letter to complete the account registration.
@@ -62,7 +63,7 @@ function Start() {
         </p>
       ) : (
         <p>
-          Start of sign up fail. Something is wrong. <br />
+          <span className="error-text">Start of sign up fail. Something is wrong.</span> <br />
           Try to{' '}
           <Link to="/signup" onClick={() => setResult(undefined)}>
             sign up
@@ -120,7 +121,7 @@ function Finish({ token, email }: FinishProps) {
   else
     return (
       <p>
-        Invitation to sign up is wrong or outdated. <br />
+        <span className="error-text">Invitation to sign up is wrong or outdated.</span> <br />
         Try to{' '}
         <Link to="/signup" onClick={() => setResult(undefined)}>
           sign up
@@ -140,19 +141,19 @@ export default function () {
   });
   return (
     <div className="App-dialog">
-      <TabSet tabindex={0} />
       <div className="App-dialog-panel">
         {!token ? (
           <Start />
         ) : !email ? (
           <p>
-            Invitation to sign up is wrong or outdated. <br />
+            <span className="error-text">Invitation to sign up is wrong or outdated.</span> <br />
             Try to <Link to="/signup">sign up</Link> again.
           </p>
         ) : (
           <Finish token={token} email={email} />
         )}
       </div>
+      <TabSet tabindex={1} />
     </div>
   );
 }
