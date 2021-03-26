@@ -1,4 +1,6 @@
 import aiosmtplib
+import logging
+import aiosmtplib.errors
 from urllib.parse import urlparse, parse_qs
 from typing import Union
 from email.mime.multipart import MIMEMultipart
@@ -34,8 +36,12 @@ class Mailer(object):
         message["From"] = from_
         message["To"] = to
         message["Subject"] = subject
-        if isinstance(body, MIMEText):
-            message.attach(body)
-        else:
-            message.attach(MIMEText(body, 'plain', 'utf-8'))
-        await aiosmtplib.send(message, **self.kwargs)
+        try:
+            if isinstance(body, MIMEText):
+                message.attach(body)
+            else:
+                message.attach(MIMEText(body, 'plain', 'utf-8'))
+            await aiosmtplib.send(message, **self.kwargs)
+        except aiosmtplib.errors.SMTPException:
+            logging.warning(f"Cannot send message: {body}")
+            raise

@@ -74,7 +74,6 @@ function CreateConference({ className, setConferenceData }: CreateProps) {
         validate={(values) => {
           const errors: Partial<ConferenceData> = {};
           if (!values.display_name) errors.display_name = 'Required';
-          if (!values.description) errors.description = 'Required';
           return errors;
         }}
         onSubmit={(values, actions) => {
