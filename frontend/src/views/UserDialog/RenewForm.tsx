@@ -113,7 +113,7 @@ function Finish({ token, email }: FinishProps) {
   else
     return (
       <p>
-        Invitation to renew password is wrong or outdated. <br />
+        <span className="error-text">Invitation to renew password is wrong or outdated.</span> <br />
         Try to{' '}
         <Link to="/renew" onClick={() => setResult(undefined)}>
           sign up
@@ -139,7 +139,7 @@ export default function () {
           <Start />
         ) : !email ? (
           <p>
-            Invitation to renew password is wrong or outdated. <br />
+            <span className="error-text">Invitation to renew password is wrong or outdated.</span> <br />
             Try to <Link to="/renew">renew password</Link> again.
           </p>
         ) : (

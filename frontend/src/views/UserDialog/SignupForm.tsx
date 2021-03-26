@@ -63,7 +63,7 @@ function Start() {
         </p>
       ) : (
         <p>
-          Start of sign up fail. Something is wrong. <br />
+          <span className="error-text">Start of sign up fail. Something is wrong.</span> <br />
           Try to{' '}
           <Link to="/signup" onClick={() => setResult(undefined)}>
             sign up
@@ -121,7 +121,7 @@ function Finish({ token, email }: FinishProps) {
   else
     return (
       <p>
-        Invitation to sign up is wrong or outdated. <br />
+        <span className="error-text">Invitation to sign up is wrong or outdated.</span> <br />
         Try to{' '}
         <Link to="/signup" onClick={() => setResult(undefined)}>
           sign up
@@ -146,7 +146,7 @@ export default function () {
           <Start />
         ) : !email ? (
           <p>
-            Invitation to sign up is wrong or outdated. <br />
+            <span className="error-text">Invitation to sign up is wrong or outdated.</span> <br />
             Try to <Link to="/signup">sign up</Link> again.
           </p>
         ) : (
