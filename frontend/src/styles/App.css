@@ -58,8 +58,8 @@
 }
 
 .App-dialog  b {
-    color: #ffffff;
-    font-weight: normal;
+    /*color: #ffffff;*/
+    font-weight: 700;
 }
 
 
@@ -189,6 +189,7 @@
     flex-direction: row;
     margin: 6px 0;
     border-bottom: 1px solid #d4d4d4;
+    padding: 4px 0;
 }
 
 .ConferenceInfo .Row:last-child {
@@ -197,16 +198,18 @@
 }
 
 .ConferenceInfo .Label {
-    color: #ffffff;
+    /*color: #ffffff;*/
     padding-right: 8px;
 }
 
 .ConferenceInfo .Memo {
-    color: #d4d4d4;
+    color: #666;
+    font-weight: 700;
 }
 
 .ConferenceInfo .Value {
-    color: #ffd503;
+    /*color: #ffd503;*/
+    font-weight: 700;
 }
 
 .ConferenceInfo button {
