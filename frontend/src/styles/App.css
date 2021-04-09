@@ -119,10 +119,16 @@
 }
 
 
-.App-dialog input, label, button {
+.App-dialog input[type="text"], 
+.App-dialog input[type="email"], 
+.App-dialog input[type="password"], 
+.App-dialog button, 
+.App-dialog textarea 
+{
     /*margin: 4px 0;
     padding: 4px;*/
-    font-size: 1em;
+    font-size: 16px;
+    font-family: 'Segoe UI', Arial;
 }
 
 .App-dialog button {
@@ -159,16 +165,39 @@
 	margin-top: 0;
 }
 
-.App-dialog input {
+.App-dialog input[type="text"], 
+.App-dialog input[type="email"],
+.App-dialog input[type="password"],
+.App-dialog textarea 
+{
 	border: 1px solid #8692A6;
 	border-radius: 6px;
-	height: 64px;
-	padding: 0 30px;
+	padding-left: 20px;
+    padding-right: 20px;
 }
-.App-dialog input:hover {
+
+.App-dialog input[type="text"],
+.App-dialog input[type="email"],
+.App-dialog input[type="password"]
+{
+    height: 64px;
+}
+.App-dialog textarea {
+    height: 150px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    resize: none;
+}
+.App-dialog input[type="text"]:hover, 
+.App-dialog input[type="email"]:hover,
+.App-dialog input[type="password"]:hover,
+.App-dialog textarea:hover {
 	border-color: #353840;
 }
-.App-dialog input:focus {
+.App-dialog input[type="text"]:focus, 
+.App-dialog input[type="email"]:focus,
+.App-dialog input[type="password"]:focus,
+.App-dialog textarea:focus {
 	box-shadow: 0px 4px 10px 3px rgba(0, 0, 0, 0.11);
 }
 
@@ -177,6 +206,16 @@
     font-size: 0.9em;
     align-self: flex-end;
     color: red;
+}
+.fieldset {
+    margin: 15px 0;
+}
+.fieldset-check label {
+    cursor: pointer;
+}
+input[type="checkbox"], input[type="radio"] {
+    vertical-align: middle;
+    margin: 0 2px;
 }
 
 .ConferenceInfo {

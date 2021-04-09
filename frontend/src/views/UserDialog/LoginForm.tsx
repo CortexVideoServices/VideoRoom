@@ -32,7 +32,7 @@ function LoginForm() {
         <Form className="App-dialog-panel">
 
           <label htmlFor="email">Yor email address</label>
-          <Field id="email" name="email" placeholder="EMail" />
+          <Field type="text" id="email" name="email" placeholder="EMail" />
           <ErrorMessage name="email" component="div" className="App-dialog-field-error" />
 
           <label htmlFor="password">Password</label>

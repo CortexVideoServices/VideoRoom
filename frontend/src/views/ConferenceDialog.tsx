@@ -86,7 +86,7 @@ function CreateConference({ className, setConferenceData }: CreateProps) {
       >
         <Form>
           <label htmlFor="display_name">Display name</label>
-          <Field id="display_name" name="display_name" placeholder="Conference display name" />
+          <Field type="text" id="display_name" name="display_name" placeholder="Conference display name" />
           <label htmlFor="description">Conference description</label>
           <Field
             id="description"
@@ -95,8 +95,10 @@ function CreateConference({ className, setConferenceData }: CreateProps) {
             component="textarea"
           />
           <ErrorMessage name="description" component="div" className="App-dialog-field-error" />
-          <label htmlFor="allow_anonymous">Allow anonymous</label>
-          <Field id="allow_anonymous" name="allow_anonymous" type="checkbox" />
+          <div className="fieldset fieldset-check">
+            <label htmlFor="allow_anonymous">Allow anonymous</label>
+            <Field id="allow_anonymous" name="allow_anonymous" type="checkbox" />
+          </div>
           <button type="submit">Create</button>
         </Form>
       </Formik>
