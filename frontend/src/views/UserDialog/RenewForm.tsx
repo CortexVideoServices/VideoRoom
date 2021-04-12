@@ -51,7 +51,7 @@ function Start() {
         <Formik initialValues={{ email: '' }} validate={validate} onSubmit={onSubmit}>
           <Form className="App-dialog-panel">
             <label htmlFor="email">Yor email address</label>
-            <Field id="email" name="email" placeholder="EMail" />
+            <Field type="text" id="email" name="email" placeholder="EMail" />
             <ErrorMessage name="email" component="div" className="App-dialog-field-error" />
             <button type="submit">Send an invitation</button>
           </Form>
@@ -92,7 +92,7 @@ function Finish({ token, email }: FinishProps) {
       <Formik initialValues={{ token, email, password: '', confirm: '' }} validate={validate} onSubmit={onSubmit}>
         <Form>
           <label htmlFor="email">Yor email address</label>
-          <Field id="email" name="email" value={email} readOnly={true} />
+          <Field type="text" id="email" name="email" value={email} readOnly={true} />
           <ErrorMessage name="email" component="div" className="App-dialog-field-error" />
           <label htmlFor="password">Password</label>
           <Field id="password" name="password" placeholder="Password" type="password" />
