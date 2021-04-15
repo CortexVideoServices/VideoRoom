@@ -36,8 +36,8 @@ If you would like to continue, please follow <a href="https://cvs.solutions/#/re
 class UserData(dict):
     """ User data class """
 
-    def __init__(self, user: User):
-        super().__init__({'user_id': user.id, 'email': user.email, 'display_name': user.display_name})
+    def __init__(self, id, email, display_name):
+        super().__init__({'user_id': id, 'email': email, 'display_name': display_name})
 
 
 class AuthManager(jwt4auth.aiohttp.AuthManager):
@@ -143,7 +143,7 @@ class Application(web.Application):
         async with db.acquire() as connection:
             query = select([User]).where(User.email == username)
             if user := await(await connection.execute(query)).first():
-                return UserData(user)
+                return UserData(user.id, user.email, user.display_name)
 
     async def save_refresh_token(self, user_data: UserData, refresh_token: str) -> bool:
         """ Saves refresh token """
@@ -195,7 +195,7 @@ class Application(web.Application):
                 result = dict(conference)
                 query = select([User.email, User.display_name]).where(User.id == conference.user_id)
                 if user := await(await connection.execute(query)).first():
-                    result['user_data'] = UserData(user)
+                    result['user_data'] = UserData(conference.user_id, *user)
                 return result
 
     async def create_conference(self, user_id, display_name, description, allow_anonymous):

@@ -4,9 +4,9 @@ from aiohttp import web
 from aiopg.sa import create_engine
 from cvs.web import with_prefix
 
-from . import Application, AuthManager
-from .handlers import routes
-from ..utils import Mailer
+from videoroom.backend import Application, AuthManager
+from videoroom.backend.handlers import routes
+from videoroom.utils import Mailer
 
 
 class WebApplication(Application):
