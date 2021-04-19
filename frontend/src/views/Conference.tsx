@@ -48,7 +48,7 @@ function Conference() {
   };
   let participantName = 'Anonymous';
   if (session.user) {
-    participantName = `${session.user.display_name}<${session.user.email}>`;
+    participantName = `${session.user.display_name} <${session.user.email}>`;
   }
 
   return allowed() ? (

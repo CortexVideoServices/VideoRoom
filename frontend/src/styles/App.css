@@ -265,21 +265,34 @@ input[type="checkbox"], input[type="radio"] {
 
 .App-conference-title {
     width: 100%;
-    margin-bottom: 10px;
+    /* margin-bottom: 10px; */
     background: #6d6e70;
     color: #ffd503;
     border-bottom: 1px white solid;
     max-height: 4em;
     display: flex;
+
+	-webkit-box-align: center!important;
+    -ms-flex-align: center!important;
+    align-items: center!important;
+}
+.App-conference-title h3 {
+	margin: 0;
 }
 
 .App-conference-title .text {
-    width: 100%
+    width: 100%;
+	padding: 5px 15px;
 }
 
-.App-conference-title .icon {
+.App-conference-title div.icon {
     color: white;
     align-self: center;
+	height: 48px;
+}
+
+.App-conference-title img.icon {
+	cursor: pointer;
 }
 
 .App-conference-panel {
@@ -305,15 +318,20 @@ input[type="checkbox"], input[type="radio"] {
 }
 
 .streamBox {
-    margin: 13px 2px 2px 2px;
-    padding: 13px 2px 2px 2px;
+    margin: 15px auto;
     border: 3px double gray;
+	position: relative;
+	max-width: 480px;
+	min-height: 360px;
 }
 
 .streamControl {
     display: block;
     position: absolute;
-    margin-top: -30px;
+	top: 0;
+	left: 0;
+	padding: 4px;
+	max-width: 100%;
 }
 
 .streamControl > div {
@@ -321,6 +339,15 @@ input[type="checkbox"], input[type="radio"] {
     margin: 0;
     position: relative;
     background: #6d6e70;
+	border-radius: 4px;
+	z-index: 2;
+}
+
+.streamControl > div > span {
+	display: inline-block;
+	margin-right: 5px;
+	font-size: 16px;
+	vertical-align: text-bottom;
 }
 
 .streamControl > div > div {
@@ -328,16 +355,19 @@ input[type="checkbox"], input[type="radio"] {
 }
 
 .streamControl > div > div > img {
-    vertical-align: text-top;
-    margin-left: 4px;
+    vertical-align: text-bottom;
+    margin: 0 4px;
     width: 1.2em;
     height: 1.2em;
+    height: 1.2em;
+	cursor: pointer;
 }
 
 .streamView {
     display: block;
-    width: 480px;
-    height: 350px;
+	width: 100%;
+    /* width: 480px;
+    height: 350px; */
 }
 
 /*
