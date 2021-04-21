@@ -14,11 +14,23 @@ function App() {
   return (
     <div className="App">
       <div className="split-screen">
-        <div className="split-screen__col section-black">
-          <div className="split-screen-center">
-            <IndexArticle/>
-          </div>
-        </div>
+        <UserSession>
+          <Switch>
+            <Route path="/conference/:session_id">
+              <div className="split-screen__header section-black">
+                <h1><img src={logo} className="heading-logo" alt="logo"/> Cortex Video Service</h1>
+              </div>
+            </Route>
+            <Route path="*">
+              <div className="split-screen__col section-black">
+                <div className="split-screen-center">
+                  <IndexArticle/>
+                </div>
+              </div>
+            </Route>
+          </Switch>
+        </UserSession>
+
         <div className="split-screen__col section-white">
           <div className="split-screen-center">
             <UserSession>
